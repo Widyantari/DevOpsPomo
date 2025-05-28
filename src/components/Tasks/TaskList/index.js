@@ -1,8 +1,8 @@
 import React, {
   memo, useState, useEffect, useMemo,
 } from 'react'
+// import PropTypes from 'prop-types' ← HAPUS karena gak dipakai
 import produce from 'immer'
-import PropTypes from 'prop-types'
 import TaskContext from './context'
 import Task from '../Task'
 import TypeSelect from '../../TypeSelect'
@@ -42,6 +42,7 @@ function TaskList() {
     setTasks(
       produce(tasks, (draft) => {
         const foundIndex = draft.findIndex((item) => item.id === task.id)
+        // eslint-disable-next-line no-param-reassign
         if (foundIndex !== -1) draft[foundIndex].closed = !draft[foundIndex].closed
       }),
     )
@@ -54,7 +55,7 @@ function TaskList() {
     setTasks(
       produce(tasks, (draft) => {
         draft.push({
-          id: Date.now(), // avoid duplicate IDs
+          id: Date.now(),
           title: trimmed,
           closed: false,
         })
@@ -117,8 +118,6 @@ function TaskList() {
   )
 }
 
-TaskList.propTypes = {
-  // selectedTaskType dihapus karena nggak dipakai
-}
+// TaskList.propTypes = {} // Gak perlu, karena ga nerima props
 
 export default memo(TaskList)

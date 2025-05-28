@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types' // <-- INI YANG KURANG
 import './Controls.css'
 
 function Controls({
@@ -49,6 +49,10 @@ Controls.propTypes = {
   reset: PropTypes.func.isRequired,
   pause: PropTypes.func.isRequired,
   status: PropTypes.oneOf(['Paused', 'Running', 'Finished', null]),
+}
+
+Controls.defaultProps = {
+  status: null,
 }
 
 export default memo(Controls)
