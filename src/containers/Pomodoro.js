@@ -1,148 +1,157 @@
-import React, { Component } from 'react';
-import TypeSelect from '../components/TypeSelect';
-import TimeDisplay from '../components/TimeDisplay';
-import Controls from '../components/Controls';
-import Shortcuts from '../components/Shortcuts';
-import ToggleSound from '../components/ToggleSound';
-import ToggleTask from '../components/Tasks/TaskToggle';
-import TaskList from '../components/Tasks/TaskList';
-import './Pomodoro.css';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+
+import TypeSelect from '../components/TypeSelect'
+import TimeDisplay from '../components/TimeDisplay'
+import Controls from '../components/Controls'
+import Shortcuts from '../components/Shortcuts'
+import ToggleSound from '../components/ToggleSound'
+import ToggleTask from '../components/Tasks/TaskToggle'
+import TaskList from '../components/Tasks/TaskList'
+
+import './Pomodoro.css'
 
 class Pomodoro extends Component {
   constructor(props) {
-    super(props);
+    super(props)
+    const storedSound = localStorage.getItem('pomodoro-react-sound')
+    const storedTask = localStorage.getItem('pomodoro-react-taskStatus')
+
     this.state = {
       selectedType: props.types[0],
       time: props.types[0].time,
       interval: null,
       running: false,
-      sound:
-        JSON.parse(window.localStorage.getItem('pomodoro-react-sound')) || true,
-      taskStatus:
-        JSON.parse(window.localStorage.getItem('pomodoro-react-taskStatus')) ||
-        null
-    };
+      sound: storedSound !== 'false',
+      taskStatus: storedTask === 'true',
+    }
+
+    this.tick = this.tick.bind(this)
   }
 
-  static defaultProps = {
-    types: [
-      { name: 'Pomodoro', time: 1500 },
-      { name: 'Short Break', time: 300 },
-      { name: 'Long Break', time: 900 }
-    ]
-  };
-
   componentDidMount() {
-    document.addEventListener('keyup', this.handleKeyUp);
-    Notification.requestPermission();
-    this.sound = new Audio('bell.flac');
-    this.sound.preload = 'auto';
+    document.addEventListener('keyup', this.handleKeyUp)
+    Notification.requestPermission()
+    this.sound = new Audio('bell.flac')
+    this.sound.preload = 'auto'
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keyup', this.handleKeyUp);
+    document.removeEventListener('keyup', this.handleKeyUp)
+    this.stopInterval()
   }
 
-  handleKeyUp = event => {
-    if (event.target.tagName === 'INPUT') return;
+  handleKeyUp = (event) => {
+    const { types } = this.props
+    if (event.target.tagName === 'INPUT') return
     if (event.key === ' ') {
-      this.pauseTimer();
+      this.pauseTimer()
     } else if (event.key === 'Escape') {
-      this.resetTimer();
-    } else if (event.key >= 1 && event.key <= this.props.types.length) {
-      this.changeType(this.props.types[event.key - 1]);
+      this.resetTimer()
+    } else if (event.key >= 1 && event.key <= types.length) {
+      this.changeType(types[event.key - 1])
     }
-  };
+  }
 
-  changeType = type => {
-    this.resetTimer();
-    this.setState({ selectedType: type, time: type.time, running: false });
-  };
+  changeType = (type) => {
+    this.resetTimer()
+    this.setState({ selectedType: type, time: type.time, running: false })
+  }
 
-  tick = () => {
-    if (this.state.time <= 1) {
-      this.stopInterval();
-      this.setState({ running: false });
-      if (this.state.sound) this.sound.play();
-      try {
-        navigator.serviceWorker.register('service-worker.js').then(sw => {
-          sw.showNotification(`${this.state.selectedType.name} finished!`);
-        });
-      } catch (e) {
-        console.log('Notification error', e);
+  tick() {
+    this.setState((state) => {
+      if (state.time <= 1) {
+        this.stopInterval()
+        if (state.sound) this.sound.play()
+        try {
+          navigator.serviceWorker.getRegistration().then((sw) => {
+            if (sw) {
+              sw.showNotification(`${state.selectedType.name} finished!`)
+            }
+          })
+        } catch (e) {
+          // Notification failed silently
+        }
+        return { time: 0, running: false }
       }
-    }
-    this.setState(state => ({ time: state.time - 1 }));
-  };
+      return { time: state.time - 1 }
+    })
+  }
 
   stopInterval = () => {
-    clearInterval(this.state.interval);
-    this.setState({ interval: null });
-  };
+    const { interval } = this.state
+    clearInterval(interval)
+    this.setState({ interval: null })
+  }
 
   startTimer = () => {
-    this.setState(state => ({
+    const { interval, time, selectedType } = this.state
+    if (interval) return
+    this.setState({
       running: true,
       interval: setInterval(this.tick, 1000),
-      time: state.time > 0 ? state.time : state.selectedType.time
-    }));
-    this.sound.pause();
-    this.sound.currentTime = 0;
-  };
+      time: time > 0 ? time : selectedType.time,
+    })
+    this.sound.pause()
+    this.sound.currentTime = 0
+  }
 
   resetTimer = () => {
-    this.stopInterval();
-    this.setState(state => ({
-      time: state.selectedType.time,
-      running: false
-    }));
-  };
+    const { selectedType } = this.state
+    this.stopInterval()
+    this.setState({
+      time: selectedType.time,
+      running: false,
+    })
+  }
 
   pauseTimer = () => {
-    this.state.interval ? this.stopInterval() : this.startTimer();
-  };
+    const { interval } = this.state
+    if (interval) {
+      this.stopInterval()
+      this.setState({ running: true })
+    } else {
+      this.startTimer()
+    }
+  }
 
   getStatus = () => {
-    const { time, running, interval } = this.state;
-    if (time === 0) return 'Finished';
-    if (running && !interval) return 'Paused';
-    if (running) return 'Running';
-  };
+    const { time, running, interval } = this.state
+    if (time === 0) return 'Finished'
+    if (running && !interval) return 'Paused'
+    if (running) return 'Running'
+    return 'Idle'
+  }
 
   getProgress = () => {
-    const current = this.state.time;
-    const total = this.state.selectedType.time;
-    return ((total - current) / total) * 100;
-  };
+    const { time, selectedType } = this.state
+    return ((selectedType.time - time) / selectedType.time) * 100
+  }
 
   handleToggleSound = () => {
     this.setState(
-      state => ({
-        sound: !state.sound
-      }),
+      (state) => ({ sound: !state.sound }),
       () => {
-        window.localStorage.setItem('pomodoro-react-sound', this.state.sound);
-      }
-    );
-  };
+        localStorage.setItem('pomodoro-react-sound', this.state.sound)
+      },
+    )
+  }
 
   handleToggleTask = () => {
     this.setState(
-      state => ({
-        taskStatus: !state.taskStatus
-      }),
+      (state) => ({ taskStatus: !state.taskStatus }),
       () => {
-        window.localStorage.setItem(
-          'pomodoro-react-taskStatus',
-          this.state.taskStatus
-        );
-      }
-    );
-  };
+        localStorage.setItem('pomodoro-react-taskStatus', this.state.taskStatus)
+      },
+    )
+  }
 
   render() {
-    const { time, selectedType, sound, taskStatus } = this.state;
-    const { types } = this.props;
+    const {
+      time, selectedType, sound, taskStatus,
+    } = this.state
+
+    const { types } = this.props
 
     return (
       <div className="Content">
@@ -173,8 +182,27 @@ class Pomodoro extends Component {
           </div>
         )}
       </div>
-    );
+    )
   }
 }
 
-export default Pomodoro;
+// ✅ FIXED: defaultProps di luar class
+Pomodoro.defaultProps = {
+  types: [
+    { name: 'Pomodoro', time: 1500 },
+    { name: 'Short Break', time: 300 },
+    { name: 'Long Break', time: 900 },
+  ],
+}
+
+// ✅ FIXED: Tambah propTypes
+Pomodoro.propTypes = {
+  types: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      time: PropTypes.number.isRequired,
+    }),
+  ).isRequired,
+}
+
+export default Pomodoro

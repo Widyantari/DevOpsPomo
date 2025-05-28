@@ -1,59 +1,86 @@
-import React, { memo, useState, useEffect } from 'react';
-import produce from 'immer';
-import TaskContext from './context';
-import Task from '../Task';
-import TypeSelect from '../../TypeSelect';
+import React, {
+  memo, useState, useEffect, useMemo,
+} from 'react'
+import produce from 'immer'
+import PropTypes from 'prop-types'
+import TaskContext from './context'
+import Task from '../Task'
+import TypeSelect from '../../TypeSelect'
 
-import './styles.css';
+import './styles.css'
 
-const TaskList = ({ selectedTaskType }) => {
-  const [input, setInput] = useState('');
+function TaskList() {
+  const [input, setInput] = useState('')
   const taskStatus = [
     { name: 'All', value: -1 },
     { name: 'Open', value: false },
-    { name: 'Closed', value: true }
-  ];
+    { name: 'Closed', value: true },
+  ]
 
-  const [tasks, setTasks] = useState(
-    JSON.parse(window.localStorage.getItem('pomodoro-react-tasks')) || []
-  );
-  const [selectedStatus, setSelectedStatus] = useState(taskStatus[0]);
+  const [tasks, setTasks] = useState(() => {
+    const stored = localStorage.getItem('pomodoro-react-tasks')
+    return stored ? JSON.parse(stored) : []
+  })
+
+  const [selectedStatus, setSelectedStatus] = useState(taskStatus[0])
 
   useEffect(() => {
-    window.localStorage.setItem('pomodoro-react-tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    window.localStorage.setItem('pomodoro-react-tasks', JSON.stringify(tasks))
+  }, [tasks])
 
-  function move(from, to) {
+  const move = (from, to) => {
     setTasks(
-      produce(tasks, draft => {
-        const taskMoved = draft[from];
-        draft.splice(from, 1);
-        draft.splice(to, 0, taskMoved);
-      })
-    );
+      produce(tasks, (draft) => {
+        const taskMoved = draft[from]
+        draft.splice(from, 1)
+        draft.splice(to, 0, taskMoved)
+      }),
+    )
   }
 
-  function handleStatus(task) {
-    console.log('task:', task);
+  const handleStatus = (task) => {
     setTasks(
-      produce(tasks, draft => {
-        const foundIndex = draft.findIndex(item => item.id === task.id);
-        draft[foundIndex].closed = !draft[foundIndex].closed;
-      })
-    );
+      produce(tasks, (draft) => {
+        const foundIndex = draft.findIndex((item) => item.id === task.id)
+        if (foundIndex !== -1) draft[foundIndex].closed = !draft[foundIndex].closed
+      }),
+    )
   }
 
-  function addTask() {
+  const addTask = () => {
+    const trimmed = input.trim()
+    if (!trimmed) return
+
     setTasks(
-      produce(tasks, draft => {
-        draft.push({ id: draft.length + 1, title: input, closed: false });
-      })
-    );
-    setInput('');
+      produce(tasks, (draft) => {
+        draft.push({
+          id: Date.now(), // avoid duplicate IDs
+          title: trimmed,
+          closed: false,
+        })
+      }),
+    )
+    setInput('')
+  }
+
+  const filteredTasks = tasks.filter(
+    (task) => selectedStatus.value === -1 || task.closed === selectedStatus.value,
+  )
+
+  const contextValue = useMemo(() => ({
+    tasks,
+    move,
+    handleStatus,
+  }), [tasks])
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      addTask()
+    }
   }
 
   return (
-    <TaskContext.Provider value={{ tasks, move, handleStatus }}>
+    <TaskContext.Provider value={contextValue}>
       <TypeSelect
         types={taskStatus}
         selected={selectedStatus}
@@ -61,16 +88,10 @@ const TaskList = ({ selectedTaskType }) => {
       />
       <div className="Tasks">
         <div className="Tasks-box">
-          {tasks.length > 0 ? (
-            tasks
-              .filter(
-                task =>
-                  task.closed === selectedStatus.value ||
-                  selectedStatus.value === -1
-              )
-              .map((task, index) => (
-                <Task key={task.id} index={index} task={task} />
-              ))
+          {filteredTasks.length > 0 ? (
+            filteredTasks.map((task, index) => (
+              <Task key={task.id} index={index} task={task} />
+            ))
           ) : (
             <div className="Task">No Tasks</div>
           )}
@@ -79,13 +100,25 @@ const TaskList = ({ selectedTaskType }) => {
       <div className="Task">
         <input
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="New Task"
+          onKeyDown={handleKeyDown}
         />
-        <span onClick={addTask}>{'Add'}</span>
+        <span
+          onClick={addTask}
+          role="button"
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+        >
+          Add
+        </span>
       </div>
     </TaskContext.Provider>
-  );
-};
+  )
+}
 
-export default memo(TaskList);
+TaskList.propTypes = {
+  // selectedTaskType dihapus karena nggak dipakai
+}
+
+export default memo(TaskList)
