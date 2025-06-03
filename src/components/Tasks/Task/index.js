@@ -9,7 +9,8 @@ export default function Task({ task, index }) {
   const ref = useRef()
   const { move, handleStatus } = useContext(TaskContext)
   const [{ isDragging }, dragRef] = useDrag({
-    item: { type: 'TASK', id: task.id, index },
+    type: 'TASK',
+    item: { id: task.id, index },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
