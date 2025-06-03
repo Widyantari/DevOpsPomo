@@ -70,7 +70,7 @@ jobs:
 
     # Variabel lingkungan khusus untuk job ini
     env:
-      AWS_REGION: ap-southeast-1 # Ganti dengan region AWS Anda (misal: us-east-1, ap-southeast-2)
+      AWS_REGION: ap-southeast-2 # Ganti dengan region AWS Anda (misal: us-east-1, ap-southeast-2)
       ECS_CLUSTER_NAME: devopspomo-cluster # Nama kluster ECS Anda
       ECS_SERVICE_NAME: devopspomo-service # Nama layanan ECS Anda
       CONTAINER_NAME: devopspomo-container # Nama container di Task Definition Anda
