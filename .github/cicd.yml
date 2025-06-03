@@ -1,25 +1,28 @@
-# .github/workflows/cd.yml
+# .github/workflows/main-pipeline.yml
 
-name: CD
+name: CI/CD Pipeline (Master Branch)
 
 on:
   push:
     branches:
-      - master # Sesuaikan dengan branch utama Anda
+      - master # Pipeline ini akan berjalan setiap kali ada push ke branch 'master'
+  pull_request:
+    branches:
+      - master # CI juga akan berjalan untuk setiap Pull Request ke 'master'
 
-env:
-  AWS_REGION: ap-southeast-1 # Ganti dengan region AWS Anda (misal: us-east-1, ap-southeast-2)
-  ECR_REPOSITORY: devopspomo-app # Sebenarnya tidak dipakai untuk ECR, tapi sebagai placeholder nama aplikasi
-  ECS_CLUSTER_NAME: devopspomo-cluster # Nama kluster ECS Anda
-  ECS_SERVICE_NAME: devopspomo-service # Nama layanan ECS Anda
-  CONTAINER_NAME: devopspomo-container # Nama container di Task Definition Anda
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} # Mengambil dari GitHub Secret Anda
-  DOCKER_PROJECT: pomonade # Nama proyek Docker Hub Anda (e.g., username/repo-name, saya asumsikan 'pomonade' dari diskusi sebelumnya)
+# Variabel lingkungan global (jika diperlukan)
+# env:
+#   SHARED_VAR: 'some-value'
 
 jobs:
-  deploy:
+  # --- JOB 1: BUILD AND TEST (CI Phase) ---
+  build-and-test:
     runs-on: ubuntu-latest
-    environment: production
+    
+    # Variabel lingkungan khusus untuk job ini (opsional)
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PROJECT: pomonade # Ganti dengan nama proyek Docker Hub Anda (misal: 'nama_repo')
 
     steps:
       - name: Checkout code
@@ -32,22 +35,24 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: .
 
-      - name: Build application
-        run: npm run build
-        working-directory: .
+      - name: Run ESLint
+        run: npm run lint
+        # continue-on-error: true # Opsional: uncomment jika Anda ingin pipeline tetap berjalan meskipun linting gagal
 
-      # --- Bagian Docker Hub ---
+      - name: Run tests with Vitest
+        run: npm run test
+        # Job ini akan gagal jika tes tidak lulus, yang akan mencegah job 'deploy' berjalan
+
+      # --- Langkah Docker Build & Push (dipindahkan ke CI, karena akan digunakan oleh CD) ---
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }} # Gunakan DOCKER_PASSWORD dari secrets
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image to Docker Hub
         env:
-          # Pastikan DOCKER_USERNAME dan DOCKER_PROJECT sesuai dengan yang Anda pakai
           IMAGE_NAME: ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_PROJECT }}
           IMAGE_TAG: ${{ github.sha }} # Menggunakan SHA commit sebagai tag unik
         run: |
@@ -56,7 +61,27 @@ jobs:
           # Tambahkan juga tag 'latest' jika Anda ingin memperbarui tag itu juga
           docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
           docker push $IMAGE_NAME:latest
-      # --- Akhir Bagian Docker Hub ---
+
+  # --- JOB 2: DEPLOY (CD Phase) ---
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production # Menunjukkan bahwa ini adalah deployment ke lingkungan produksi
+    needs: build-and-test # Job ini HANYA akan berjalan jika job 'build-and-test' SUKSES
+
+    # Variabel lingkungan khusus untuk job ini
+    env:
+      AWS_REGION: ap-southeast-1 # Ganti dengan region AWS Anda (misal: us-east-1, ap-southeast-2)
+      ECS_CLUSTER_NAME: devopspomo-cluster # Nama kluster ECS Anda
+      ECS_SERVICE_NAME: devopspomo-service # Nama layanan ECS Anda
+      CONTAINER_NAME: devopspomo-container # Nama container di Task Definition Anda
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} # Mengambil dari GitHub Secret Anda
+      DOCKER_PROJECT: pomonade # Nama proyek Docker Hub Anda (harus sama dengan di job CI)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # Checkout lagi karena 'deploy' adalah job terpisah yang berjalan di runner baru
+        # Jika Anda hanya perlu artefak dari 'build-and-test', Anda bisa menggunakan actions/upload-artifact dan actions/download-artifact
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -67,6 +92,7 @@ jobs:
 
       - name: Download current ECS task definition
         run: |
+          # Perhatikan: Langkah ini mengasumsikan layanan ECS sudah ada.
           aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE_NAME }} \
           --query 'taskDefinition.{family:family,containerDefinitions:containerDefinitions,volumes:volumes,cpu:cpu,memory:memory,networkMode:networkMode,placementConstraints:placementConstraints,requiresCompatibilities:requiresCompatibilities,cpu:cpu,memory:memory,taskRoleArn:taskRoleArn,executionRoleArn:executionRoleArn}' \
           > task-definition.json
@@ -77,7 +103,7 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
-          # Ubah image path ini untuk menunjuk ke Docker Hub Anda
+          # Path image menunjuk ke Docker Hub, menggunakan SHA commit yang sama dari job CI
           image: ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_PROJECT }}:${{ github.sha }}
 
       - name: Deploy Amazon ECS task definition
