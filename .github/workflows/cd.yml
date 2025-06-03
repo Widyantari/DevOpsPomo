@@ -6,12 +6,6 @@ on:
   push:
     branches:
       - master # Sesuaikan dengan branch utama Anda
-    paths:
-      - 'src/**'
-      - 'Dockerfile'
-      - 'nginx.conf'
-      - 'package.json'
-      - 'package-lock.json'
 
 env:
   AWS_REGION: ap-southeast-1 # Ganti dengan region AWS Anda (misal: us-east-1, ap-southeast-2)
