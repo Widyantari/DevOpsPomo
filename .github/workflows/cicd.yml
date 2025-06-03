@@ -72,7 +72,7 @@ jobs:
     env:
       AWS_REGION: ap-southeast-2 # Ganti dengan region AWS Anda (misal: us-east-1, ap-southeast-2)
       ECS_CLUSTER_NAME: devopspomo-cluster # Nama kluster ECS Anda
-      ECS_SERVICE_NAME: devopspomo-service # Nama layanan ECS Anda
+      ECS_SERVICE_NAME: devopspomo-service-service-e7j3r0sk # Nama layanan ECS Anda
       CONTAINER_NAME: devopspomo-container # Nama container di Task Definition Anda
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} # Mengambil dari GitHub Secret Anda
       DOCKER_PROJECT: pomonade # Nama proyek Docker Hub Anda (harus sama dengan di job CI)
