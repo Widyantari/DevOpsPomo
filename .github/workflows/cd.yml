@@ -1,0 +1,95 @@
+# .github/workflows/cd.yml
+
+name: Continuous Deployment to AWS ECS Fargate (Docker Hub)
+
+on:
+  push:
+    branches:
+      - master # Sesuaikan dengan branch utama Anda
+    paths:
+      - 'src/**'
+      - 'Dockerfile'
+      - 'nginx.conf'
+      - 'package.json'
+      - 'package-lock.json'
+
+env:
+  AWS_REGION: ap-southeast-1 # Ganti dengan region AWS Anda (misal: us-east-1, ap-southeast-2)
+  ECR_REPOSITORY: devopspomo-app # Sebenarnya tidak dipakai untuk ECR, tapi sebagai placeholder nama aplikasi
+  ECS_CLUSTER_NAME: devopspomo-cluster # Nama kluster ECS Anda
+  ECS_SERVICE_NAME: devopspomo-service # Nama layanan ECS Anda
+  CONTAINER_NAME: devopspomo-container # Nama container di Task Definition Anda
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} # Mengambil dari GitHub Secret Anda
+  DOCKER_PROJECT: pomonade # Nama proyek Docker Hub Anda (e.g., username/repo-name, saya asumsikan 'pomonade' dari diskusi sebelumnya)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: .
+
+      - name: Build application
+        run: npm run build
+        working-directory: .
+
+      # --- Bagian Docker Hub ---
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }} # Gunakan DOCKER_PASSWORD dari secrets
+
+      - name: Build and push Docker image to Docker Hub
+        env:
+          # Pastikan DOCKER_USERNAME dan DOCKER_PROJECT sesuai dengan yang Anda pakai
+          IMAGE_NAME: ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_PROJECT }}
+          IMAGE_TAG: ${{ github.sha }} # Menggunakan SHA commit sebagai tag unik
+        run: |
+          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          # Tambahkan juga tag 'latest' jika Anda ingin memperbarui tag itu juga
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:latest
+      # --- Akhir Bagian Docker Hub ---
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download current ECS task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE_NAME }} \
+          --query 'taskDefinition.{family:family,containerDefinitions:containerDefinitions,volumes:volumes,cpu:cpu,memory:memory,networkMode:networkMode,placementConstraints:placementConstraints,requiresCompatibilities:requiresCompatibilities,cpu:cpu,memory:memory,taskRoleArn:taskRoleArn,executionRoleArn:executionRoleArn}' \
+          > task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          # Ubah image path ini untuk menunjuk ke Docker Hub Anda
+          image: ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_PROJECT }}:${{ github.sha }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE_NAME }}
+          cluster: ${{ env.ECS_CLUSTER_NAME }}
+          wait-for-service-stability: true
