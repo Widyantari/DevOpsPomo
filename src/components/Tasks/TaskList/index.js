@@ -1,7 +1,6 @@
 import React, {
-  memo, useState, useEffect, useMemo,
+  memo, useState, useEffect, useMemo, useCallback,
 } from 'react'
-// import PropTypes from 'prop-types' ← HAPUS karena gak dipakai
 import produce from 'immer'
 import TaskContext from './context'
 import Task from '../Task'
@@ -28,7 +27,7 @@ function TaskList() {
     window.localStorage.setItem('pomodoro-react-tasks', JSON.stringify(tasks))
   }, [tasks])
 
-  const move = (from, to) => {
+  const move = useCallback((from, to) => {
     setTasks(
       produce(tasks, (draft) => {
         const taskMoved = draft[from]
@@ -36,9 +35,9 @@ function TaskList() {
         draft.splice(to, 0, taskMoved)
       }),
     )
-  }
+  }, [tasks])
 
-  const handleStatus = (task) => {
+  const handleStatus = useCallback((task) => {
     setTasks(
       produce(tasks, (draft) => {
         const foundIndex = draft.findIndex((item) => item.id === task.id)
@@ -46,7 +45,7 @@ function TaskList() {
         if (foundIndex !== -1) draft[foundIndex].closed = !draft[foundIndex].closed
       }),
     )
-  }
+  }, [tasks])
 
   const addTask = () => {
     const trimmed = input.trim()
@@ -72,7 +71,7 @@ function TaskList() {
     tasks,
     move,
     handleStatus,
-  }), [tasks])
+  }), [tasks, move, handleStatus])
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -117,7 +116,5 @@ function TaskList() {
     </TaskContext.Provider>
   )
 }
-
-// TaskList.propTypes = {} // Gak perlu, karena ga nerima props
 
 export default memo(TaskList)

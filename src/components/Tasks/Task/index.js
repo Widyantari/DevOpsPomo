@@ -1,4 +1,5 @@
 import React, { useRef, useContext } from 'react'
+import PropTypes from 'prop-types'
 import { useDrag, useDrop } from 'react-dnd'
 import './styles.css'
 
@@ -29,7 +30,9 @@ export default function Task({ task, index }) {
       if (dragged.order > target.order && draggedTop > targetCenter) return
 
       move(item.index, index)
+      /* eslint-disable no-param-reassign */
       item.index = index
+      /* eslint-enable no-param-reassign */
     },
   })
 
@@ -38,9 +41,24 @@ export default function Task({ task, index }) {
   return (
     <div ref={ref} className={isDragging ? 'Task Dragging' : 'Task'}>
       <div>{task.title}</div>
-      <span onClick={() => handleStatus(task)}>
+      <span
+        role="button"
+        tabIndex="0"
+        onClick={() => handleStatus(task)}
+        onKeyDown={(e) => { if (e.key === 'Enter') handleStatus(task) }}
+      >
         {task.closed ? 'Open' : 'Close'}
       </span>
     </div>
   )
+}
+
+Task.propTypes = {
+  task: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title: PropTypes.string.isRequired,
+    closed: PropTypes.bool.isRequired,
+    order: PropTypes.number,
+  }).isRequired,
+  index: PropTypes.number.isRequired,
 }

@@ -58,24 +58,24 @@ class Pomodoro extends Component {
     this.setState({ selectedType: type, time: type.time, running: false })
   }
 
-  tick() {
-    this.setState((state) => {
-      if (state.time <= 1) {
-        this.stopInterval()
-        if (state.sound) this.sound.play()
-        try {
-          navigator.serviceWorker.getRegistration().then((sw) => {
-            if (sw) {
-              sw.showNotification(`${state.selectedType.name} finished!`)
-            }
-          })
-        } catch (e) {
-          // Notification failed silently
-        }
-        return { time: 0, running: false }
-      }
-      return { time: state.time - 1 }
-    })
+  handleToggleSound = () => {
+    this.setState(
+      (state) => ({ sound: !state.sound }),
+      () => {
+        const { sound } = this.state
+        localStorage.setItem('pomodoro-react-sound', sound)
+      },
+    )
+  }
+
+  handleToggleTask = () => {
+    this.setState(
+      (state) => ({ taskStatus: !state.taskStatus }),
+      () => {
+        const { taskStatus } = this.state
+        localStorage.setItem('pomodoro-react-taskStatus', taskStatus)
+      },
+    )
   }
 
   stopInterval = () => {
@@ -128,22 +128,24 @@ class Pomodoro extends Component {
     return ((selectedType.time - time) / selectedType.time) * 100
   }
 
-  handleToggleSound = () => {
-    this.setState(
-      (state) => ({ sound: !state.sound }),
-      () => {
-        localStorage.setItem('pomodoro-react-sound', this.state.sound)
-      },
-    )
-  }
-
-  handleToggleTask = () => {
-    this.setState(
-      (state) => ({ taskStatus: !state.taskStatus }),
-      () => {
-        localStorage.setItem('pomodoro-react-taskStatus', this.state.taskStatus)
-      },
-    )
+  tick() {
+    this.setState((state) => {
+      if (state.time <= 1) {
+        this.stopInterval()
+        if (state.sound) this.sound.play()
+        try {
+          navigator.serviceWorker.getRegistration().then((sw) => {
+            if (sw) {
+              sw.showNotification(`${state.selectedType.name} finished!`)
+            }
+          })
+        } catch (e) {
+          // Notification failed silently
+        }
+        return { time: 0, running: false }
+      }
+      return { time: state.time - 1 }
+    })
   }
 
   render() {
@@ -186,16 +188,6 @@ class Pomodoro extends Component {
   }
 }
 
-// ✅ FIXED: defaultProps di luar class
-Pomodoro.defaultProps = {
-  types: [
-    { name: 'Pomodoro', time: 1500 },
-    { name: 'Short Break', time: 300 },
-    { name: 'Long Break', time: 900 },
-  ],
-}
-
-// ✅ FIXED: Tambah propTypes
 Pomodoro.propTypes = {
   types: PropTypes.arrayOf(
     PropTypes.shape({

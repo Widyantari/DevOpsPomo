@@ -1,5 +1,6 @@
 import React from 'react'
-import { formatTime } from '../helpers'
+import PropTypes from 'prop-types'
+import formatTime from '../helpers'
 import './TimeDisplay.css'
 
 function TimeDisplay({ time, status, progress }) {
@@ -39,6 +40,12 @@ function TimeDisplay({ time, status, progress }) {
       </div>
     </div>
   )
+}
+
+TimeDisplay.propTypes = {
+  time: PropTypes.number.isRequired,
+  status: PropTypes.string.isRequired,
+  progress: PropTypes.number.isRequired,
 }
 
 export default TimeDisplay
