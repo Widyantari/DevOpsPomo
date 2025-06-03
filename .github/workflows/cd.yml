@@ -1,6 +1,6 @@
 # .github/workflows/cd.yml
 
-name: Continuous Deployment to AWS ECS Fargate (Docker Hub)
+name: CD
 
 on:
   push:
