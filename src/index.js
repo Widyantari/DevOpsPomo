@@ -6,8 +6,8 @@ import Pomodoro from './containers/Pomodoro'
 
 const types = [
   { name: 'Pomodoro', time: 25 * 60 },
-  { name: 'Short Break', time: 5 * 60 },
-  { name: 'Long Break', time: 15 * 60 },
+  { name: 'Istirahat Sebentar', time: 5 * 60 },
+  { name: 'Istirahat Lama', time: 15 * 60 },
 ]
 
 ReactDOM.render(
