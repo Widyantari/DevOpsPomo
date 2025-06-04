@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import PropTypes from 'prop-types'
 import formatTime from '../helpers'
 import './TimeDisplay.css'
 
 function TimeDisplay({ time, status, progress }) {
-  document.title = `(${formatTime(time)}) Pomodoro`
+  const defaultTitle = useRef(document.title)
+  document.title = `(${formatTime(time)}) ${defaultTitle.current}`
 
   const radius = 150
   const stroke = 5
