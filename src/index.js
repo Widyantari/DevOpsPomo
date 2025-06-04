@@ -5,7 +5,7 @@ import { DndProvider } from 'react-dnd'
 import Pomodoro from './containers/Pomodoro'
 
 const types = [
-  { name: 'Pomodoro', time: 25 * 60 },
+  { name: 'Pomodoro Timer', time: 25 * 60 },
   { name: 'Istirahat Sebentar', time: 5 * 60 },
   { name: 'Istirahat Lama', time: 15 * 60 },
 ]
