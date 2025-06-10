@@ -1,6 +1,6 @@
-import React, { memo } from 'react'
-import PropTypes from 'prop-types'
-import './TypeSelect.css'
+import React, { memo } from 'react';
+import PropTypes from 'prop-types';
+import './TypeSelect.css';
 
 function TypeSelect({ types, changeType, selected }) {
   return (
@@ -16,7 +16,7 @@ function TypeSelect({ types, changeType, selected }) {
         </button>
       ))}
     </div>
-  )
+  );
 }
 
 TypeSelect.propTypes = {
@@ -29,6 +29,6 @@ TypeSelect.propTypes = {
   selected: PropTypes.shape({
     name: PropTypes.string.isRequired,
   }).isRequired,
-}
+};
 
-export default memo(TypeSelect)
+export default memo(TypeSelect);

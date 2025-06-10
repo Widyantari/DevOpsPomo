@@ -1,6 +1,6 @@
-import React, { memo } from 'react'
-import PropTypes from 'prop-types'
-import './styles.css'
+import React, { memo } from 'react';
+import PropTypes from 'prop-types';
+import './styles.css';
 
 function TaskToggle({ task, toggleTask }) {
   return (
@@ -13,12 +13,12 @@ function TaskToggle({ task, toggleTask }) {
     >
       <i className="fa fa-tasks" />
     </button>
-  )
+  );
 }
 
 TaskToggle.propTypes = {
   task: PropTypes.bool.isRequired,
   toggleTask: PropTypes.func.isRequired,
-}
+};
 
-export default memo(TaskToggle)
+export default memo(TaskToggle);

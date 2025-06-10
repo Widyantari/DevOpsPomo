@@ -1,5 +1,5 @@
 // vitest.config.js
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -7,4 +7,4 @@ export default defineConfig({
     setupFiles: './setupTests.js', // tambahkan baris ini
     globals: true, // <-- TAMBAHKAN BARIS INI!
   },
-})
+});

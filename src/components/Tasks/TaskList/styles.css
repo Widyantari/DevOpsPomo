@@ -20,7 +20,7 @@
   padding: 15px;
   justify-content: space-between;
   align-items: center;
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 13px;
   color: #666;
   cursor: grab;
@@ -28,7 +28,7 @@
 
 .Task input {
   width: 100%;
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 13px;
   border: none;
   outline: none;
@@ -39,7 +39,9 @@
   background-color: #f4f4f4;
   border: 1px solid #ccc;
   border-radius: 3px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1), inset 0 0 0 1px #fff;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px #fff;
   color: #333;
   font-size: 11px;
   margin: 0 0.15em;

@@ -1,55 +1,72 @@
 import React, {
-  memo, useState, useEffect, useMemo, useCallback,
-} from 'react'
-import produce from 'immer'
-import TaskContext from './context'
-import Task from '../Task'
-import TypeSelect from '../../TypeSelect'
+  memo,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
+import produce from 'immer';
+import TaskContext from './context';
+import Task from '../Task';
+import TypeSelect from '../../TypeSelect';
 
-import './styles.css'
+import './styles.css';
 
 function TaskList() {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState('');
   const taskStatus = [
     { name: 'All', value: -1 },
     { name: 'Open', value: false },
     { name: 'Closed', value: true },
-  ]
+  ];
 
   const [tasks, setTasks] = useState(() => {
-    const stored = localStorage.getItem('pomodoro-react-tasks')
-    return stored ? JSON.parse(stored) : []
-  })
+    const stored = localStorage.getItem('pomodoro-react-tasks');
+    return stored ? JSON.parse(stored) : [];
+  });
 
-  const [selectedStatus, setSelectedStatus] = useState(taskStatus[0])
+  const [selectedStatus, setSelectedStatus] = useState(taskStatus[0]);
 
   useEffect(() => {
-    window.localStorage.setItem('pomodoro-react-tasks', JSON.stringify(tasks))
-  }, [tasks])
+    window.localStorage.setItem('pomodoro-react-tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
-  const move = useCallback((from, to) => {
-    setTasks(
-      produce(tasks, (draft) => {
-        const taskMoved = draft[from]
-        draft.splice(from, 1)
-        draft.splice(to, 0, taskMoved)
-      }),
-    )
-  }, [tasks])
+  const move = useCallback(
+    (from, to) => {
+      setTasks(
+        produce(tasks, (draft) => {
+          const taskMoved = draft[from];
+          draft.splice(from, 1);
+          draft.splice(to, 0, taskMoved);
+        }),
+      );
+    },
+    [tasks],
+  );
 
-  const handleStatus = useCallback((task) => {
-    setTasks(
-      produce(tasks, (draft) => {
-        const foundIndex = draft.findIndex((item) => item.id === task.id)
-        // eslint-disable-next-line no-param-reassign
-        if (foundIndex !== -1) draft[foundIndex].closed = !draft[foundIndex].closed
-      }),
-    )
-  }, [tasks])
+  const handleStatus = useCallback(
+    (task) => {
+      setTasks(
+        produce(tasks, (draft) => {
+          const foundIndex = draft.findIndex((item) => item.id === task.id);
+          if (foundIndex !== -1) {
+            // Hindari assignment langsung ke properti draft[foundIndex]
+            // Buat object baru, lalu replace
+            const updatedTask = {
+              ...draft[foundIndex],
+              closed: !draft[foundIndex].closed,
+            };
+            draft.splice(foundIndex, 1, updatedTask);
+          }
+        }),
+      );
+    },
+    [tasks],
+  );
 
   const addTask = () => {
-    const trimmed = input.trim()
-    if (!trimmed) return
+    const trimmed = input.trim();
+    if (!trimmed) return;
 
     setTasks(
       produce(tasks, (draft) => {
@@ -57,27 +74,30 @@ function TaskList() {
           id: Date.now(),
           title: trimmed,
           closed: false,
-        })
+        });
       }),
-    )
-    setInput('')
-  }
+    );
+    setInput('');
+  };
 
-  const filteredTasks = tasks.filter(
-    (task) => selectedStatus.value === -1 || task.closed === selectedStatus.value,
-  )
+  const filteredTasks = tasks.filter((task) => (
+    selectedStatus.value === -1 || task.closed === selectedStatus.value
+  ));
 
-  const contextValue = useMemo(() => ({
-    tasks,
-    move,
-    handleStatus,
-  }), [tasks, move, handleStatus])
+  const contextValue = useMemo(
+    () => ({
+      tasks,
+      move,
+      handleStatus,
+    }),
+    [tasks, move, handleStatus],
+  );
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      addTask()
+      addTask();
     }
-  }
+  };
 
   return (
     <TaskContext.Provider value={contextValue}>
@@ -114,7 +134,7 @@ function TaskList() {
         </span>
       </div>
     </TaskContext.Provider>
-  )
+  );
 }
 
-export default memo(TaskList)
+export default memo(TaskList);

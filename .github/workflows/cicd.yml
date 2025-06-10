@@ -18,7 +18,7 @@ jobs:
   # --- JOB 1: BUILD AND TEST (CI Phase) ---
   build-and-test:
     runs-on: ubuntu-latest
-    
+
     # Variabel lingkungan khusus untuk job ini (opsional)
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}

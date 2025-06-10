@@ -1,6 +1,6 @@
-import React, { memo } from 'react'
-import PropTypes from 'prop-types'
-import './ToggleSound.css'
+import React, { memo } from 'react';
+import PropTypes from 'prop-types';
+import './ToggleSound.css';
 
 function ToggleSound({ sound, toggleSound }) {
   return (
@@ -13,12 +13,12 @@ function ToggleSound({ sound, toggleSound }) {
     >
       <i className={`fa fa-volume-${sound ? 'up' : 'mute'}`} />
     </button>
-  )
+  );
 }
 
 ToggleSound.propTypes = {
   sound: PropTypes.bool.isRequired,
   toggleSound: PropTypes.func.isRequired,
-}
+};
 
-export default memo(ToggleSound)
+export default memo(ToggleSound);

@@ -1,5 +1,5 @@
-import React, { memo } from 'react'
-import './Shortcuts.css'
+import React, { memo } from 'react';
+import './Shortcuts.css';
 
 function Shortcuts() {
   return (
@@ -41,7 +41,7 @@ function Shortcuts() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default memo(Shortcuts)
+export default memo(Shortcuts);
