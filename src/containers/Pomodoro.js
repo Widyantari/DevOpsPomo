@@ -1,37 +1,36 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
-import TypeSelect from '../components/TypeSelect';
-import TimeDisplay from '../components/TimeDisplay';
-import Controls from '../components/Controls';
-import Shortcuts from '../components/Shortcuts';
-import ToggleSound from '../components/ToggleSound';
-import ToggleTask from '../components/Tasks/TaskToggle';
-import TaskList from '../components/Tasks/TaskList';
+import TypeSelect from '../components/TypeSelect'
+import TimeDisplay from '../components/TimeDisplay'
+import Controls from '../components/Controls'
+import Shortcuts from '../components/Shortcuts'
+import ToggleSound from '../components/ToggleSound'
+import ToggleTask from '../components/Tasks/TaskToggle'
+import TaskList from '../components/Tasks/TaskList'
 
-import './Pomodoro.css';
+import './Pomodoro.css'
 
-// Helper function untuk mengambil data dari localStorage atau menggunakan default
 const getInitialTimes = (defaultTypes) => {
   try {
-    const storedTimes = localStorage.getItem('pomodoro-custom-times');
-    const parsedTimes = storedTimes ? JSON.parse(storedTimes) : null;
+    const storedTimes = localStorage.getItem('pomodoro-custom-times')
+    const parsedTimes = storedTimes ? JSON.parse(storedTimes) : null
     if (Array.isArray(parsedTimes) && parsedTimes.length > 0) {
-      return parsedTimes;
+      return parsedTimes
     }
   } catch (e) {
-    console.error("Gagal mengambil data waktu dari localStorage:", e);
+    // console.error("Gagal mengambil data waktu dari localStorage:", e);
   }
-  return defaultTypes;
-};
+  return defaultTypes
+}
 
 class Pomodoro extends Component {
   constructor(props) {
-    super(props);
-    const storedSound = localStorage.getItem('pomodoro-react-sound');
-    const storedTask = localStorage.getItem('pomodoro-react-taskStatus');
-    const initialTimes = getInitialTimes(props.types);
-    const initialType = (initialTimes && initialTimes.length > 0) ? initialTimes[0] : { name: 'Error', time: 0 };
+    super(props)
+    const storedSound = localStorage.getItem('pomodoro-react-sound')
+    const storedTask = localStorage.getItem('pomodoro-react-taskStatus')
+    const initialTimes = getInitialTimes(props.types)
+    const initialType = initialTimes.length > 0 ? initialTimes[0] : { name: 'Error', time: 0 }
 
     this.state = {
       customTimes: initialTimes,
@@ -41,166 +40,159 @@ class Pomodoro extends Component {
       running: false,
       sound: storedSound !== 'false',
       taskStatus: storedTask === 'true',
-    };
+    }
 
-    this.tick = this.tick.bind(this);
+    this.tick = this.tick.bind(this)
   }
 
   componentDidMount() {
-    document.addEventListener('keyup', this.handleKeyUp);
-    Notification.requestPermission();
-    this.sound = new Audio('bell.flac');
-    this.sound.preload = 'auto';
+    document.addEventListener('keyup', this.handleKeyUp)
+    Notification.requestPermission()
+    this.sound = new Audio('bell.flac')
+    this.sound.preload = 'auto'
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keyup', this.handleKeyUp);
-    this.stopInterval();
+    document.removeEventListener('keyup', this.handleKeyUp)
+    this.stopInterval()
   }
 
   handleKeyUp = (event) => {
-    const { customTimes } = this.state;
-    if (event.target.tagName === 'INPUT') return;
-
-    if (event.key === ' ') this.pauseTimer();
-    else if (event.key === 'Escape') this.resetTimer();
+    const { customTimes } = this.state
+    if (event.target.tagName === 'INPUT') return
+    if (event.key === ' ') this.pauseTimer()
+    else if (event.key === 'Escape') this.resetTimer()
     else if (event.key >= 1 && event.key <= customTimes.length) {
-      this.changeType(customTimes[event.key - 1]);
+      this.changeType(customTimes[event.key - 1])
     }
-  };
+  }
 
   changeType = (type) => {
-    this.stopInterval(); // Selalu hentikan timer saat ganti tipe
+    this.stopInterval()
     this.setState({
       selectedType: type,
       time: type.time,
       running: false,
-    });
-  };
+    })
+  }
 
   handleTimeChange = (event) => {
-    if (this.state.running) return;
+    const { name, value } = event.target
+    const intValue = parseInt(value, 10) || 0
+    const { customTimes, selectedType, running } = this.state
+    if (running) return
 
-    const { name, value } = event.target;
-    const { customTimes, selectedType } = this.state;
-    const intValue = parseInt(value, 10) || 0;
+    let currentMinutes = Math.floor(selectedType.time / 60)
+    let currentSeconds = selectedType.time % 60
 
-    let currentMinutes = Math.floor(selectedType.time / 60);
-    let currentSeconds = selectedType.time % 60;
+    if (name === 'minutes') currentMinutes = Math.min(intValue, 99)
+    if (name === 'seconds') currentSeconds = Math.min(intValue, 59)
 
-    if (name === 'minutes') {
-      currentMinutes = intValue > 99 ? 99 : intValue; // Batasi maksimal 99 menit
-    } else if (name === 'seconds') {
-      currentSeconds = intValue > 59 ? 59 : intValue; // Batasi maksimal 59 detik
-    }
+    const newTotalSeconds = currentMinutes * 60 + currentSeconds
 
-    const newTotalSeconds = (currentMinutes * 60) + currentSeconds;
+    const newCustomTimes = customTimes.map((type) => (
+      type.name === selectedType.name
+        ? { ...type, time: newTotalSeconds }
+        : type
+    ))
 
-    const newCustomTimes = customTimes.map(type => {
-      if (type.name === selectedType.name) {
-        return { ...type, time: newTotalSeconds };
-      }
-      return type;
-    });
-
-    localStorage.setItem('pomodoro-custom-times', JSON.stringify(newCustomTimes));
+    localStorage.setItem('pomodoro-custom-times', JSON.stringify(newCustomTimes))
 
     this.setState({
       customTimes: newCustomTimes,
       selectedType: { ...selectedType, time: newTotalSeconds },
       time: newTotalSeconds,
-    });
-  };
+    })
+  }
 
   handleToggleSound = () => {
-    this.setState(
-      (state) => ({ sound: !state.sound }),
-      () => {
-        localStorage.setItem('pomodoro-react-sound', this.state.sound);
-      },
-    );
-  };
+    this.setState(({ sound }) => {
+      const updated = !sound
+      localStorage.setItem('pomodoro-react-sound', updated)
+      return { sound: updated }
+    })
+  }
 
   handleToggleTask = () => {
-    this.setState(
-      (state) => ({ taskStatus: !state.taskStatus }),
-      () => {
-        localStorage.setItem('pomodoro-react-taskStatus', this.state.taskStatus);
-      },
-    );
-  };
+    this.setState(({ taskStatus }) => {
+      const updated = !taskStatus
+      localStorage.setItem('pomodoro-react-taskStatus', updated)
+      return { taskStatus: updated }
+    })
+  }
 
   stopInterval = () => {
-    clearInterval(this.state.interval);
-    this.setState({ interval: null });
-  };
+    const { interval } = this.state
+    clearInterval(interval)
+    this.setState({ interval: null })
+  }
 
   startTimer = () => {
-    if (this.state.interval) return;
+    const { interval, time, selectedType } = this.state
+    if (interval) return
     this.setState({
       running: true,
       interval: setInterval(this.tick, 1000),
-      time: this.state.time > 0 ? this.state.time : this.state.selectedType.time,
-    });
-    this.sound.pause();
-    this.sound.currentTime = 0;
-  };
+      time: time > 0 ? time : selectedType.time,
+    })
+    this.sound.pause()
+    this.sound.currentTime = 0
+  }
 
   resetTimer = () => {
-    this.stopInterval();
-    this.setState({
-      time: this.state.selectedType.time,
-      running: false,
-    });
-  };
+    const { selectedType } = this.state
+    this.stopInterval()
+    this.setState({ time: selectedType.time, running: false })
+  }
 
   pauseTimer = () => {
     this.setState((prevState) => {
       if (prevState.interval) {
-        this.stopInterval();
-        return { running: false };
+        clearInterval(prevState.interval)
+        return { running: false, interval: null }
       }
-      this.startTimer();
-      return null; // startTimer sudah mengatur state
-    });
-  };
+      this.startTimer()
+      return null
+    })
+  }
 
   getStatus = () => {
-    const { time, running } = this.state;
-    if (time === 0) return 'Finished';
-    if (running) return 'Running';
-    // Jika tidak berjalan dan waktu tidak sama dengan waktu awal, berarti paused
-    if (!running && time < this.state.selectedType.time) return 'Paused';
-    return 'Idle';
-  };
+    const { time, running, selectedType } = this.state
+    if (time === 0) return 'Finished'
+    if (running) return 'Running'
+    if (!running && time < selectedType.time) return 'Paused'
+    return 'Idle'
+  }
 
   getProgress = () => {
-    const { time, selectedType } = this.state;
-    if (selectedType.time === 0) return 0;
-    return ((selectedType.time - time) / selectedType.time) * 100;
-  };
+    const { time, selectedType } = this.state
+    return selectedType.time === 0 ? 0 : ((selectedType.time - time) / selectedType.time) * 100
+  }
 
   tick() {
-    this.setState((state) => {
-      if (state.time <= 1) {
-        this.stopInterval();
-        if (state.sound) this.sound.play();
+    this.setState((prevState) => {
+      if (prevState.time <= 1) {
+        this.stopInterval()
+        if (prevState.sound) this.sound.play()
         try {
           navigator.serviceWorker.getRegistration().then((sw) => {
-            if (sw) sw.showNotification(`${state.selectedType.name} finished!`);
-          });
-        } catch (e) { /* Gagal secara diam-diam */ }
-        return { time: 0, running: false };
+            if (sw) sw.showNotification(`${prevState.selectedType.name} finished!`)
+          })
+        } catch (_) {
+        // Error silently ignored
+        }
+        return { time: 0, running: false }
       }
-      return { time: state.time - 1 };
-    });
+      return { time: prevState.time - 1 }
+    })
   }
 
   render() {
-    const { time, selectedType, sound, taskStatus, customTimes, running } = this.state;
-
-    const currentMinutes = Math.floor(selectedType.time / 60);
-    const currentSeconds = selectedType.time % 60;
+    const {
+      time, selectedType, sound, taskStatus, customTimes, running,
+    } = this.state
+    const currentMinutes = Math.floor(selectedType.time / 60)
+    const currentSeconds = selectedType.time % 60
 
     return (
       <div className="Content">
@@ -210,11 +202,7 @@ class Pomodoro extends Component {
             <p>Pomodoro Timer App</p>
           </div>
 
-          <TypeSelect
-            types={customTimes}
-            selected={selectedType}
-            changeType={this.changeType}
-          />
+          <TypeSelect types={customTimes} selected={selectedType} changeType={this.changeType} />
 
           <div className="TimeInputGroup">
             <input
@@ -239,12 +227,8 @@ class Pomodoro extends Component {
               max="59"
             />
           </div>
-          
-          <TimeDisplay
-            time={time}
-            status={this.getStatus()}
-            progress={this.getProgress()}
-          />
+
+          <TimeDisplay time={time} status={this.getStatus()} progress={this.getProgress()} />
 
           <div className="ControlsContainer">
             <Controls
@@ -261,14 +245,14 @@ class Pomodoro extends Component {
             <ToggleSound sound={sound} toggleSound={this.handleToggleSound} />
           </div>
         </div>
-        
+
         {taskStatus && (
           <div className="TaskPainel">
             <TaskList />
           </div>
         )}
       </div>
-    );
+    )
   }
 }
 
@@ -279,6 +263,6 @@ Pomodoro.propTypes = {
       time: PropTypes.number.isRequired,
     }),
   ).isRequired,
-};
+}
 
-export default Pomodoro;
+export default Pomodoro
