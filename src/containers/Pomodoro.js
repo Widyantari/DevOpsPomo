@@ -11,6 +11,7 @@ import TaskList from '../components/Tasks/TaskList';
 
 import './Pomodoro.css';
 
+// Helper function untuk mengambil data dari localStorage atau menggunakan default
 const getInitialTimes = (defaultTypes) => {
   try {
     const storedTimes = localStorage.getItem('pomodoro-custom-times');
@@ -19,8 +20,7 @@ const getInitialTimes = (defaultTypes) => {
       return parsedTimes;
     }
   } catch (e) {
-    // Aturan 'no-console' melarang adanya console.error di sini.
-    // Gagal mengambil data akan kembali ke default secara diam-diam.
+    console.error("Gagal mengambil data waktu dari localStorage:", e);
   }
   return defaultTypes;
 };
@@ -70,7 +70,7 @@ class Pomodoro extends Component {
   };
 
   changeType = (type) => {
-    this.stopInterval();
+    this.stopInterval(); // Selalu hentikan timer saat ganti tipe
     this.setState({
       selectedType: type,
       time: type.time,
@@ -79,24 +79,24 @@ class Pomodoro extends Component {
   };
 
   handleTimeChange = (event) => {
-    const { running, customTimes, selectedType } = this.state;
-    if (running) return;
+    if (this.state.running) return;
 
     const { name, value } = event.target;
+    const { customTimes, selectedType } = this.state;
     const intValue = parseInt(value, 10) || 0;
 
     let currentMinutes = Math.floor(selectedType.time / 60);
     let currentSeconds = selectedType.time % 60;
 
     if (name === 'minutes') {
-      currentMinutes = intValue > 99 ? 99 : intValue;
+      currentMinutes = intValue > 99 ? 99 : intValue; // Batasi maksimal 99 menit
     } else if (name === 'seconds') {
-      currentSeconds = intValue > 59 ? 59 : intValue;
+      currentSeconds = intValue > 59 ? 59 : intValue; // Batasi maksimal 59 detik
     }
 
     const newTotalSeconds = (currentMinutes * 60) + currentSeconds;
 
-    const newCustomTimes = customTimes.map((type) => {
+    const newCustomTimes = customTimes.map(type => {
       if (type.name === selectedType.name) {
         return { ...type, time: newTotalSeconds };
       }
@@ -113,65 +113,64 @@ class Pomodoro extends Component {
   };
 
   handleToggleSound = () => {
-    // PERBAIKAN: Menggunakan updater function untuk setState
-    this.setState((prevState) => ({ sound: !prevState.sound }), () => {
-      const { sound } = this.state;
-      localStorage.setItem('pomodoro-react-sound', sound);
-    });
+    this.setState(
+      (state) => ({ sound: !state.sound }),
+      () => {
+        localStorage.setItem('pomodoro-react-sound', this.state.sound);
+      },
+    );
   };
 
   handleToggleTask = () => {
-    // PERBAIKAN: Menggunakan updater function untuk setState
-    this.setState((prevState) => ({ taskStatus: !prevState.taskStatus }), () => {
-      const { taskStatus } = this.state;
-      localStorage.setItem('pomodoro-react-taskStatus', taskStatus);
-    });
+    this.setState(
+      (state) => ({ taskStatus: !state.taskStatus }),
+      () => {
+        localStorage.setItem('pomodoro-react-taskStatus', this.state.taskStatus);
+      },
+    );
   };
 
   stopInterval = () => {
-    const { interval } = this.state;
-    clearInterval(interval);
+    clearInterval(this.state.interval);
     this.setState({ interval: null });
   };
 
   startTimer = () => {
-    const { interval, time, selectedType } = this.state;
-    if (interval) return;
+    if (this.state.interval) return;
     this.setState({
       running: true,
       interval: setInterval(this.tick, 1000),
-      time: time > 0 ? time : selectedType.time,
+      time: this.state.time > 0 ? this.state.time : this.state.selectedType.time,
     });
     this.sound.pause();
     this.sound.currentTime = 0;
   };
 
   resetTimer = () => {
-    const { selectedType } = this.state;
     this.stopInterval();
     this.setState({
-      time: selectedType.time,
+      time: this.state.selectedType.time,
       running: false,
     });
   };
 
   pauseTimer = () => {
-    // PERBAIKAN: Menggunakan updater function untuk setState
     this.setState((prevState) => {
       if (prevState.interval) {
         this.stopInterval();
         return { running: false };
       }
       this.startTimer();
-      return null; // startTimer sudah mengatur state running
+      return null; // startTimer sudah mengatur state
     });
   };
 
   getStatus = () => {
-    const { time, running, selectedType } = this.state;
+    const { time, running } = this.state;
     if (time === 0) return 'Finished';
     if (running) return 'Running';
-    if (!running && time < selectedType.time) return 'Paused';
+    // Jika tidak berjalan dan waktu tidak sama dengan waktu awal, berarti paused
+    if (!running && time < this.state.selectedType.time) return 'Paused';
     return 'Idle';
   };
 
@@ -182,29 +181,23 @@ class Pomodoro extends Component {
   };
 
   tick() {
-    // PERBAIKAN: Menggunakan updater function untuk setState
-    this.setState((prevState) => {
-      if (prevState.time <= 1) {
+    this.setState((state) => {
+      if (state.time <= 1) {
         this.stopInterval();
-        const { sound, selectedType } = this.state;
-        if (sound) this.sound.play();
+        if (state.sound) this.sound.play();
         try {
           navigator.serviceWorker.getRegistration().then((sw) => {
-            if (sw) sw.showNotification(`${selectedType.name} finished!`);
+            if (sw) sw.showNotification(`${state.selectedType.name} finished!`);
           });
         } catch (e) { /* Gagal secara diam-diam */ }
         return { time: 0, running: false };
       }
-      return { time: prevState.time - 1 };
+      return { time: state.time - 1 };
     });
   }
 
   render() {
-    // PERBAIKAN: Menggunakan destructuring untuk props dan state
-    const {
-      time, selectedType, sound, taskStatus, customTimes, running,
-    } = this.state;
-    const { types } = this.props;
+    const { time, selectedType, sound, taskStatus, customTimes, running } = this.state;
 
     const currentMinutes = Math.floor(selectedType.time / 60);
     const currentSeconds = selectedType.time % 60;
@@ -246,7 +239,7 @@ class Pomodoro extends Component {
               max="59"
             />
           </div>
-
+          
           <TimeDisplay
             time={time}
             status={this.getStatus()}
@@ -264,11 +257,11 @@ class Pomodoro extends Component {
 
           <div className="BottomControls">
             <ToggleTask task={taskStatus} toggleTask={this.handleToggleTask} />
-            <Shortcuts types={types} />
+            <Shortcuts />
             <ToggleSound sound={sound} toggleSound={this.handleToggleSound} />
           </div>
         </div>
-
+        
         {taskStatus && (
           <div className="TaskPainel">
             <TaskList />
