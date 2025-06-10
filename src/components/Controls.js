@@ -1,6 +1,6 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import './Controls.css';
+import React from 'react'
+import PropTypes from 'prop-types'
+import './Controls.css'
 
 function Controls({
   start,
@@ -37,7 +37,7 @@ function Controls({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 Controls.propTypes = {
@@ -45,6 +45,6 @@ Controls.propTypes = {
   reset: PropTypes.func.isRequired,
   pause: PropTypes.func.isRequired,
   status: PropTypes.string.isRequired,
-};
+}
 
-export default React.memo(Controls);
+export default React.memo(Controls)
