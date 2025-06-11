@@ -1,53 +1,116 @@
+/* File: src/components/Tasks/TaskList/styles.css */
+
+/* --- CONTAINER LIST --- */
 .Tasks {
-  width: 400px;
-  height: 300px;
-  overflow-y: scroll;
+  width: 100%;
+  max-width: 420px;
+  height: 260px; /* Sesuaikan tinggi jika perlu */
+  overflow-y: auto;
+  padding-right: 5px;
 }
 
 .Tasks .Tasks-box {
-  background: #fff;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-  transition: opacity 0.3s;
+  background: transparent; /* Hapus background putih agar menyatu */
+  border: none; /* Hapus border */
+  box-shadow: none; /* Hapus bayangan */
 }
 
+/* --- STYLING UNTUK SATU ITEM TUGAS --- */
 .Task {
-  width: 400px;
   background: #fff;
   display: flex;
-  border-bottom: 1px solid #eee;
-  padding: 15px;
+  border: 1px solid #e0e0e0; /* Beri border pada tiap item */
+  border-radius: 8px; /* Sudut tumpul */
+  padding: 12px 16px;
   justify-content: space-between;
   align-items: center;
   font-family: 'Roboto', sans-serif;
-  font-size: 13px;
-  color: #666;
+  font-size: 14px;
+  color: #333;
   cursor: grab;
+  margin-bottom: 8px; /* Jarak antar item tugas */
 }
 
-.Task input {
-  width: 100%;
-  font-family: 'Roboto', sans-serif;
-  font-size: 13px;
-  border: none;
-  outline: none;
+/* --- STYLING TOMBOL-TOMBOL AKSI SOLID --- */
+.Task-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.Task span {
-  display: inline-block;
-  font-family: monospace;
-  background-color: #f4f4f4;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.1),
-    inset 0 0 0 1px #fff;
-  color: #333;
-  font-size: 11px;
-  margin: 0 0.15em;
-  padding: 0.25em 0.7em;
+
+.Task-actions span {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  border: none; /* Hapus border */
+  color: #fff; /* Teks putih untuk semua tombol */
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 6px 14px;
   white-space: nowrap;
-  width: 70px;
   text-align: center;
   cursor: pointer;
+  transition: opacity 0.2s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Bayangan halus */
+}
+
+.Task-actions span:hover {
+  opacity: 0.85; /* Efek hover sederhana */
+}
+
+/* Warna untuk tombol ON PROGRESS */
+.Task-status.on-progress {
+  background-color: #f39c12; /* Oranye */
+}
+
+/* Warna untuk tombol DONE */
+.Task-status.done {
+  background-color: #27ae60; /* Hijau */
+}
+
+/* Warna untuk tombol DELETE */
+.Task-delete {
+  background-color: #e74c3c; /* Merah */
+}
+
+/* --- STYLING AREA INPUT TUGAS BARU --- */
+.AddTask-container {
+  margin-top: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 6px 6px 6px 16px;
+  cursor: default;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+}
+
+.AddTask-container:hover {
+  background-color: #fff; /* Menghapus efek hover dari item tugas biasa */
+}
+
+.AddTask-container input {
+  width: 100%;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  background-color: transparent;
+}
+
+.AddTask-button {
+  background-color: #d9534f; /* Warna merah solid */
+  color: #fff; /* Teks putih */
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  border-radius: 6px;
+  padding: 8px 18px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.AddTask-button:hover {
+  background-color: #c9302c; /* Warna merah lebih gelap saat hover */
 }

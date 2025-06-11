@@ -16,8 +16,8 @@ function TaskList() {
   const [input, setInput] = useState('');
   const taskStatus = [
     { name: 'All', value: -1 },
-    { name: 'Open', value: false },
-    { name: 'Closed', value: true },
+    { name: 'On Progress', value: false },
+    { name: 'Done', value: true },
   ];
 
   const [tasks, setTasks] = useState(() => {
@@ -48,13 +48,9 @@ function TaskList() {
     (task) => {
       setTasks(
         produce(tasks, (draft) => {
-          const foundIndex = draft.findIndex((item) => item.id === task.id);
-          if (foundIndex !== -1) {
-            const updatedTask = {
-              ...draft[foundIndex],
-              closed: !draft[foundIndex].closed,
-            };
-            draft.splice(foundIndex, 1, updatedTask);
+          const foundTask = draft.find((item) => item.id === task.id);
+          if (foundTask) {
+            foundTask.closed = !foundTask.closed;
           }
         }),
       );
@@ -130,7 +126,9 @@ function TaskList() {
           )}
         </div>
       </div>
-      <div className="Task">
+
+      {/* --- 👇 BAGIAN INI YANG SAYA PERBAIKI --- */}
+      <div className="Task AddTask-container">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -142,6 +140,7 @@ function TaskList() {
           role="button"
           tabIndex={0}
           onKeyDown={handleKeyDown}
+          className="AddTask-button"
         >
           Add
         </span>

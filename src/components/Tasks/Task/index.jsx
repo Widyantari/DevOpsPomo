@@ -1,3 +1,5 @@
+// File: src/components/Tasks/Task/index.jsx
+
 import React, { useRef, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
@@ -44,16 +46,16 @@ export default function Task({ task, index }) {
     <div ref={ref} className={isDragging ? 'Task Dragging' : 'Task'}>
       <div>{task.title}</div>
       <div className="Task-actions">
-        {/* Saya tambahkan wrapper agar rapi */}
         <span
           role="button"
           tabIndex="0"
+          className={`Task-status ${task.closed ? 'done' : 'on-progress'}`}
           onClick={() => handleStatus(task)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleStatus(task);
           }}
         >
-          {task.closed ? 'Open' : 'Close'}
+          {task.closed ? 'Done' : 'On Progress'}
         </span>
 
         <span

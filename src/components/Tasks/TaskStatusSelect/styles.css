@@ -1,39 +1,35 @@
-.TypeSelect {
-  width: 400px;
-  display: flex;
-}
+/* File: src/components/Tasks/TaskStatusSelect/styles.css */
 
-@media screen and (max-width: 500px) {
-  .TypeSelect {
-    width: 100%;
-  }
+.TypeSelect {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  border-bottom: 1px solid #e0e0e0; /* Garis bawah abu-abu untuk seluruh area tab */
+  margin-bottom: 8px; /* Mengurangi jarak ke list */
 }
 
 .TypeSelect button {
   flex: 1;
-  border: 2px solid #ccc;
-  border-right: 0;
+  border: none; /* Hapus semua border */
+  border-bottom: 3px solid transparent; /* Border bawah transparan sebagai dasar */
   background: transparent;
   font-family: 'Roboto', sans-serif;
   font-size: 14px;
-  padding: 10px;
-  color: #999;
+  font-weight: 500;
+  padding: 12px 10px;
+  color: #888; /* Warna teks non-aktif lebih gelap */
   outline: 0;
-  transition: all 0.3s;
+  transition: all 0.2s ease-in-out;
   cursor: pointer;
+  margin-bottom: -1px; /* Trik agar border bawah aktif menyatu dengan garis utama */
 }
 
-.TypeSelect button:first-child {
-  border-radius: 5px 0 0 5px;
+.TypeSelect button:hover {
+  color: #333; /* Warna teks saat hover */
 }
 
-.TypeSelect button:last-child {
-  border-right: 2px solid #ccc;
-  border-radius: 0 5px 5px 0;
-}
-
+/* Gaya untuk tombol yang sedang aktif */
 .TypeSelect button.active {
-  background: #fff;
-  color: #d9534f;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  color: #d9534f; /* Warna teks merah */
+  border-bottom-color: #d9534f; /* Garis bawah merah tebal */
 }
