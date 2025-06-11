@@ -16,27 +16,13 @@ Aplikasi ini diambil melalui forking source pada github https://github.com/luizb
 
 ## Tools yang Digunakan
 
-Kami memanfaatkan alat-alat berikut untuk membuat Pipeline CI/CD yang baik untuk Pomonode:
-
-### AWS (Amazon Web Services)
-
-AWS (Amazon Web Services) bisa digunakan untuk menjalankan aplikasi yang sudah dibuat dalam bentuk container, seperti yang ada di Docker Hub. Setelah aplikasi dikirim ke Docker Hub, AWS lewat layanan bernama ECS (Elastic Container Service) bisa mengambil aplikasi itu dan menjalankannya di server milik AWS. Dengan cara ini, kita bisa menjalankan aplikasi tanpa perlu mengatur server secara manual, dan AWS bisa membantu mengatur jalannya aplikasi supaya tetap lancar.
-
-### GitHub Actions
-
-GitHub Actions adalah fitur otomatisasi terintegrasi dalam platform GitHub yang dirancang untuk mengotomatisasi alur kerja pengembangan perangkat lunak secara langsung dari repositori. Fungsinya mencakup dukungan untuk Continuous Integration (CI), seperti eksekusi pengujian otomatis dan pemeriksaan kualitas kode, serta Continuous Deployment (CD) guna mengotomatiskan proses pengiriman aplikasi. Lebih lanjut, GitHub Actions juga sangat efektif untuk manajemen rilis, pembaruan dokumentasi, dan berbagai tugas repetitif lainnya. Setiap kali terjadi perubahan pada kode, misalnya melalui commit atau pull request, sebuah proses otomatis akan terpicu untuk melakukan build, pengujian, dan distribusi aplikasi.
-
-### ESLint
-
-ESLint adalah alat penting yang berfungsi untuk memeriksa dan memperbaiki kode JavaScript secara statis, memastikan kode tetap rapi dan bebas dari kesalahan. Dengan ESLint, pengembang dapat memastikan kode mengikuti standar dan aturan tertentu, serta mencegah potensi bug sejak tahap awal pengembangan. Di proyek pomonade, pemanfaatan ESLint diintegrasikan langsung pada pipeline CI/CD. Hal ini sangat krusial karena setiap perubahan kode akan secara otomatis melalui pemeriksaan kualitas oleh ESLint, sehingga kami dapat menjaga konsistensi dan kualitas kode secara berkelanjutan di seluruh proyek.
-
-### Vitest
-
-Vitest adalah sebuah framework pengujian (testing) modern berbasis JavaScript yang dirancang untuk performa tinggi dan kompatibilitas yang luas, terutama dalam ekosistem Vite. Dengan integrasi yang mulus terhadap proyek Vite, Vitest membantu memastikan bahwa kode aplikasi berjalan sesuai harapan dan tetap stabil dalam setiap iterasi pengembangan.
-
-### Docker
-
-Docker merupakan sebuah platform containerization untuk membuat, mendistribusikan, dan menjalankan aplikasi dalam wadah (container) yang portabel, konsisten, dan terisolasi. Dengan menggunakan Docker, aplikasi beserta dependensinya dapat dikemas menjadi satu kesatuan yang dapat dijalankan di berbagai lingkungan, baik pada perangkat lokal, server cloud, maupun infrastruktur lainnya, tanpa perlu melakukan pengaturan ulang yang kompleks. Hal ini juga mengurangi risiko terjadinya ketidakcocokan environtment, antar device karena seluruh eksekusi aplikasi dilakukan pada lingkungan yang sama secara konsisten. Berikut ini adalah kode dari dockerfile dan hasilnya yaitu docker image
+Kami memanfaatkan tools berikut dalam membuat Pipeline CI/CD untuk aplikasi Pomonode:
+- AWS (Amazon Web Services): Menjalankan aplikasi container dari Docker Hub via ECS tanpa perlu mengatur server manual. Mendukung deployment yang scalable dan terkelola.
+- GitHub Actions: Otomatisasi CI/CD langsung dari GitHub. Memicu build, test, dan deployment setiap ada commit atau pull request.
+- ESLint: Linter untuk kode JavaScript. Menjaga kualitas dan konsistensi kode dengan deteksi error otomatis di pipeline CI/CD.
+- Vitest: Framework testing modern untuk proyek berbasis Vite. Memastikan kestabilan dan kebenaran fungsi aplikasi.
+- Docker: Platform untuk membungkus aplikasi dan dependensinya dalam container yang portabel dan konsisten. Menghindari masalah perbedaan environment.
+- AWS CloudWatch: Layanan monitoring dari AWS untuk mengawasi metrik, log, dan performa aplikasi serta infrastruktur. Membantu mendeteksi error, memantau resource, dan mengatur notifikasi otomatis bila terjadi gangguan.
 
 ## Tahap Pengembangan (CI/CD Pipeline)
 
