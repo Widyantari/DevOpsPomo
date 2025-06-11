@@ -6,6 +6,8 @@
 - Widyantari Nuriyanti (5026221137)
 - Sheva Aulia (5026221145)
 
+Dokumentasi pembuatan aplikasi: intip.in/DokumentasiKonfigurasi
+
 ![Screenshot](screenshot.png)
 
 ## 🍋 Deskripsi Aplikasi
@@ -126,6 +128,5 @@ Service menjaga task tetap berjalan, dan ALB mendistribusikan trafik:
 
 - **Autoscaling**: pilih **Do not configure autoscaling**
 
----
 
 ## PSO A
