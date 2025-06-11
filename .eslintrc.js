@@ -13,5 +13,6 @@ module.exports = {
     semi: ['warn', 'never'],
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'react/react-in-jsx-scope': 'off', // since React 17+
+    'comma-dangle': 'off',
   },
 };
