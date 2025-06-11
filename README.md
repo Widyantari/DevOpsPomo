@@ -6,13 +6,13 @@
 - Widyantari Nuriyanti (5026221137)
 - Sheva Aulia (5026221145)
 
-Dokumentasi pembuatan aplikasi: intip.in/DokumentasiKonfigurasi
+Dokumentasi pembuatan aplikasi: [Dokumentasi Pembuatan](https://intip.in/DokumentasiKonfigurasi/)
 
 ![Screenshot](screenshot.png)
 
 ## 🍋 Deskripsi Aplikasi
 
-Aplikasi timer dengan menerapkan metode pomodoro yaitu 25 menit bekerja secara aktif serta istirahat antar sesi. Waktu istirahat dapat dipilih sesuai dengan kebutuhan pengguna, terdapat pilihan Istirahat Sebentar dan Istirahat Lama.
+Aplikasi timer dengan menerapkan metode pomodoro yaitu 25 menit bekerja secara aktif serta istirahat antar sesi. Waktu istirahat dapat dipilih sesuai dengan kebutuhan pengguna, terdapat pilihan Short Break (istirahat sebentar) dan Long Break (istirahat lama.
 
 Aplikasi ini diambil melalui forking source pada github https://github.com/luizbatanero/pomodoro-react. Perubahan fitur yang dilakukan adalah menambahkan custom lama waktu untuk bekerja secara aktif sehingga bisa disesuaikan dengan keinginan pengguna.
 
