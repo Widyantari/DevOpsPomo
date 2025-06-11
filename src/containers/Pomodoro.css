@@ -147,3 +147,34 @@ body {
     min-height: auto;
   }
 }
+
+.TaskPanel-header {
+  padding: 0 10px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.TaskPanel-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 500;
+}
+
+.TaskPanel-header {
+  text-align: center; /* Membuat tulisan ke tengah */
+  margin-bottom: 22px; /* Menambah jarak ke bawah */
+  padding-bottom: 0;   /* Menghapus padding bawah yang tidak perlu */
+  border-bottom: none; /* Menghapus garis bawah agar lebih bersih */
+}
+
+.TaskPanel-header h2 {
+  margin: 0;
+  /* Ganti 'Nunito' dengan nama font 'Pomonade' Anda jika tahu namanya */
+  /* 'Nunito' adalah contoh font rounded yang bagus dan gratis */
+  font-family: 'Nunito', 'Roboto', sans-serif;
+  font-size: 26px; /* Samakan ukuran font dengan judul 'Pomonade' */
+  color: #3a3a3a; /* Warna teks yang lebih pekat */
+  font-weight: 700; /* Dibuat lebih tebal */
+}
