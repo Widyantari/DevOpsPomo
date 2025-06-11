@@ -24,75 +24,108 @@ Kami memanfaatkan tools berikut dalam membuat Pipeline CI/CD untuk aplikasi Pomo
 - Docker: Platform untuk membungkus aplikasi dan dependensinya dalam container yang portabel dan konsisten. Menghindari masalah perbedaan environment.
 - AWS CloudWatch: Layanan monitoring dari AWS untuk mengawasi metrik, log, dan performa aplikasi serta infrastruktur. Membantu mendeteksi error, memantau resource, dan mengatur notifikasi otomatis bila terjadi gangguan.
 
-## Tahap Pengembangan (CI/CD Pipeline)
+## Installation
 
-Alur kerja CI/CD kami mengotomatiskan proses pembuatan, pengujian, dan penerapan Pomonode. Berikut ini adalah uraian langkah-langkah utama:
+- Clone repository:
+```bash
+git clone https://github.com/widyantari/DevOpsPomo.git
+```
 
-### AWS Setup
+- Masuk ke directory dan install dependencies :
+```bash
+cd DevOpsPomo && npm install
+```
 
-1. Buat Pengguna IAM untuk GitHub Actions
-   Untuk memungkinkan GitHub Actions berinteraksi dengan AWS, kami membuat pengguna IAM khusus:
+- Jalankan aplikasi:
+```bash
+npm run start
+```
 
-- Masuk ke Konsol AWS > IAM > Pengguna (Users) > Tambahkan pengguna (Add users).
-- Beri nama (e.g., DevOpsPomo).
-- Pilih Akses terprogram (Programmatic access).
-- Lampirkan kebijakan:
-  - AmazonEC2ContainerRegistryPowerUser
-  - AmazonECS_FullAccess
-  - IAMReadOnlyAccess
-- Selesaikan pembuatan pengguna, lalu catat Access Key ID dan Secret Access Key.
+## 🌩️ Tahap Pengaturan Cloud
 
-2. Membuat Peran pada Layanan ECS
-   Peran IAM dibuat agar ECS dapat menjalankan tugas:
+### 1. 👤 Buat Akun Pengguna IAM untuk GitHub Actions
 
-- Masuk ke Konsol AWS > IAM > Peran (Roles) > Buat peran (Create role).
-- Pilih Layanan AWS (AWS Service) as the trusted entity.
-- Cari dan pilih "Elastic Container Service".
-- Lanjutkan dan buat peran. Pastikan namanya otomatis menjadi AWSServiceRoleForECS.
+Untuk memungkinkan GitHub Actions berinteraksi dengan AWS, buat pengguna IAM khusus:
 
-3. Membuat Klaster ECS
-   Klaster ECS berfungsi sebagai pengelompokan logis untuk layanan kami:
+- Buka **AWS Console > IAM > Users > Add users**
+- Isi nama pengguna, contoh: `DevOpsPomo`
+- Pilih tipe akses: **Programmatic access**
+- Lampirkan policy berikut:
+  - `AmazonEC2ContainerRegistryPowerUser`
+  - `AmazonECS_FullAccess`
+  - `IAMReadOnlyAccess`
+- Selesaikan pembuatan, lalu **catat Access Key ID dan Secret Access Key**
 
-- Masuk ke Konsol AWS > ECS > Kluster (Clusters) > Buat Kluster (Create Cluster).
-  Pilih template "AWS Fargate".
-- Beri Nama kluster yang persis sama dengan ECS_CLUSTER_NAME di cicd.yml (misal devopspomo-cluster).
-- Biarkan pengaturan VPC default.
-- Selesaikan pembuatan kluster.
+---
 
-4. Membuat Definisi Tugas (Task Definition) ECS
-   Definisi tugas menjelaskan bagaimana aplikasi kita berjalan di ECS:
+### 2. 🛡️ Membuat Peran untuk ECS
 
-- Masuk ke Konsol AWS > ECS > Definisi Tugas (Task Definitions) > Buat definisi tugas baru (Create new Task Definition).
-- Pilih "Fargate".
-- Beri Nama definisi tugas yang persis sama dengan ECS_SERVICE_NAME di cicd.yml (misal devopspomo-service).
-- Peran Eksekusi Tugas: Pilih "Buat peran baru" (akan membuat ecsTaskExecutionRole).
-- Ukuran Tugas: Pilih 0.5GB memori dan 0.25 vCPU.
-- Tambahkan Kontainer:
-  - Nama kontainer: Persis sama dengan CONTAINER_NAME di main-pipeline.yml (misal devopspomo-container).
-  - Image: Masukkan URI image Docker Hub publik ( widyantari/pomonade:latest).
-  - Port mappings: 80 (untuk Nginx).
-  - Selesaikan pembuatan definisi tugas.
+Agar ECS dapat menjalankan task, buat IAM Role:
 
-5. Membuat Layanan ECS (Service) dan Application Load Balancer (ALB)
-   Layanan ECS mempertahankan jumlah tugas yang diinginkan, dan ALB mendistribusikan lalu lintas masuk:
+- Buka **IAM > Roles > Create role**
+- Pilih trusted entity: **AWS Service**
+- Cari dan pilih: **Elastic Container Service**
+- Lanjutkan dan selesaikan pembuatan role
+- Nama role akan menjadi: `AWSServiceRoleForECS` (default)
 
-- Dari halaman ringkasan Definisi Tugas yang baru dibuat, klik "Buat Layanan" (Create Service).
-- Langkah 1: Konfigurasi Layanan:
-  - Kluster: Pilih kluster (devopspomo-cluster).
-  - Jenis Peluncuran: "Fargate".
-  - Definisi Tugas: Pilih definisi tugas yang baru dibuat (devopspomo-service:revisi_terbaru).
-  - Nama Layanan: Persis sama dengan ECS_SERVICE_NAME di main-pipeline.yml (misal devopspomo-service).
-  - Jumlah Tugas yang diinginkan: 1.
-- Langkah 2: Konfigurasi Jaringan:
-  - VPC: VPC default.
-  - Subnet: Pilih setidaknya dua subnet publik.
-  - Grup keamanan (Security Group): Buat grup keamanan baru (misal devopspomo-sg), atur aturan \* masuk HTTP port 80 dari 0.0.0.0/0.
-  - Penyeimbang Beban (Load Balancing): Pilih "Application Load Balancer".
-  - Nama penyeimbang beban: Buat baru (devopspomo-alb).
-  - Grup target untuk penyeimbang beban: Buat grup target baru (misal devopspomo-tg), atur protokol HTTP port 80.
-- Langkah 3: Atur Autoscaling: Pilih "Jangan konfigurasikan penskalaan otomatis".
+---
 
-Runs the app in development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 3. 🧱 Membuat Klaster ECS
+
+Klaster adalah tempat ECS service dijalankan:
+
+- Buka **ECS > Clusters > Create Cluster**
+- Pilih template: **AWS Fargate**
+- Isi nama klaster, misalnya: `devopspomo-cluster`  
+  (harus sama dengan `ECS_CLUSTER_NAME` di `cicd.yml`)
+- Gunakan pengaturan VPC default
+- Klik **Create**
+
+---
+
+### 4. 📦 Membuat Definisi Tugas (Task Definition)
+
+Mendefinisikan cara menjalankan container:
+
+- Buka **ECS > Task Definitions > Create new Task Definition**
+- Pilih launch type: **Fargate**
+- Nama definisi tugas: `devopspomo-service`  
+  (harus sama dengan `ECS_SERVICE_NAME`)
+- Execution role: **Buat peran baru** → otomatis jadi `ecsTaskExecutionRole`
+- Task size:
+  - Memory: `0.5 GB`
+  - vCPU: `0.25 vCPU`
+- Tambahkan kontainer:
+  - **Name**: `devopspomo-container` (sesuai `CONTAINER_NAME`)
+  - **Image**: `widyantari/pomonade:latest`
+  - **Port mapping**: `80`
+- Klik **Create**
+
+---
+
+### 5. 🌐 Membuat ECS Service & Application Load Balancer (ALB)
+
+Service menjaga task tetap berjalan, dan ALB mendistribusikan trafik:
+
+- Dari Task Definition, klik **Create Service**
+- **Konfigurasi Service**:
+  - Cluster: `devopspomo-cluster`
+  - Launch type: `Fargate`
+  - Task Definition: `devopspomo-service`
+  - Service name: `devopspomo-service`
+  - Desired tasks: `1`
+
+- **Konfigurasi Jaringan**:
+  - VPC: default
+  - Subnet: pilih minimal 2 **public subnet**
+  - Security Group: buat baru `devopspomo-sg`
+    - Tambahkan rule: HTTP (port 80) dari `0.0.0.0/0`
+  - Load Balancer: pilih **Application Load Balancer**
+  - Buat ALB: `devopspomo-alb`
+  - Buat Target Group: `devopspomo-tg` (protocol HTTP, port 80)
+
+- **Autoscaling**: pilih **Do not configure autoscaling**
+
+---
 
 ## PSO A
