@@ -7,7 +7,8 @@ import TaskContext from '../TaskList/context';
 
 export default function Task({ task, index }) {
   const ref = useRef();
-  const { move, handleStatus } = useContext(TaskContext);
+  const { move, handleStatus, deleteTask } = useContext(TaskContext);
+
   const [{ isDragging }, dragRef] = useDrag({
     type: 'TASK',
     item: { id: task.id, index },
@@ -42,16 +43,31 @@ export default function Task({ task, index }) {
   return (
     <div ref={ref} className={isDragging ? 'Task Dragging' : 'Task'}>
       <div>{task.title}</div>
-      <span
-        role="button"
-        tabIndex="0"
-        onClick={() => handleStatus(task)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') handleStatus(task);
-        }}
-      >
-        {task.closed ? 'Open' : 'Close'}
-      </span>
+      <div className="Task-actions">
+        {/* Saya tambahkan wrapper agar rapi */}
+        <span
+          role="button"
+          tabIndex="0"
+          onClick={() => handleStatus(task)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleStatus(task);
+          }}
+        >
+          {task.closed ? 'Open' : 'Close'}
+        </span>
+
+        <span
+          role="button"
+          tabIndex="0"
+          className="Task-delete"
+          onClick={() => deleteTask(task.id)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') deleteTask(task.id);
+          }}
+        >
+          Delete
+        </span>
+      </div>
     </div>
   );
 }

@@ -50,13 +50,25 @@ function TaskList() {
         produce(tasks, (draft) => {
           const foundIndex = draft.findIndex((item) => item.id === task.id);
           if (foundIndex !== -1) {
-            // Hindari assignment langsung ke properti draft[foundIndex]
-            // Buat object baru, lalu replace
             const updatedTask = {
               ...draft[foundIndex],
               closed: !draft[foundIndex].closed,
             };
             draft.splice(foundIndex, 1, updatedTask);
+          }
+        }),
+      );
+    },
+    [tasks],
+  );
+
+  const deleteTask = useCallback(
+    (taskId) => {
+      setTasks(
+        produce(tasks, (draft) => {
+          const foundIndex = draft.findIndex((item) => item.id === taskId);
+          if (foundIndex !== -1) {
+            draft.splice(foundIndex, 1);
           }
         }),
       );
@@ -89,8 +101,9 @@ function TaskList() {
       tasks,
       move,
       handleStatus,
+      deleteTask,
     }),
-    [tasks, move, handleStatus],
+    [tasks, move, handleStatus, deleteTask],
   );
 
   const handleKeyDown = (e) => {
