@@ -8,13 +8,13 @@
 
 ![Screenshot](screenshot.png)
 
-## Deskripsi Aplikasi
+## 🍋 Deskripsi Aplikasi
 
 Aplikasi timer dengan menerapkan metode pomodoro yaitu 25 menit bekerja secara aktif serta istirahat antar sesi. Waktu istirahat dapat dipilih sesuai dengan kebutuhan pengguna, terdapat pilihan Istirahat Sebentar dan Istirahat Lama.
 
 Aplikasi ini diambil melalui forking source pada github https://github.com/luizbatanero/pomodoro-react. Perubahan fitur yang dilakukan adalah menambahkan custom lama waktu untuk bekerja secara aktif sehingga bisa disesuaikan dengan keinginan pengguna.
 
-## Tools yang Digunakan
+## 🧰 Tools yang Digunakan
 
 Kami memanfaatkan tools berikut dalam membuat Pipeline CI/CD untuk aplikasi Pomonode:
 - AWS (Amazon Web Services): Menjalankan aplikasi container dari Docker Hub via ECS tanpa perlu mengatur server manual. Mendukung deployment yang scalable dan terkelola.
@@ -24,7 +24,7 @@ Kami memanfaatkan tools berikut dalam membuat Pipeline CI/CD untuk aplikasi Pomo
 - Docker: Platform untuk membungkus aplikasi dan dependensinya dalam container yang portabel dan konsisten. Menghindari masalah perbedaan environment.
 - AWS CloudWatch: Layanan monitoring dari AWS untuk mengawasi metrik, log, dan performa aplikasi serta infrastruktur. Membantu mendeteksi error, memantau resource, dan mengatur notifikasi otomatis bila terjadi gangguan.
 
-## Installation
+## 🛠️ Instalasi Aplikasi
 
 - Clone repository:
 ```bash
@@ -43,7 +43,7 @@ npm run start
 
 ## 🌩️ Tahap Pengaturan Cloud
 
-### 1. 👤 Buat Akun Pengguna IAM untuk GitHub Actions
+### 1. Buat Akun Pengguna IAM untuk GitHub Actions
 
 Untuk memungkinkan GitHub Actions berinteraksi dengan AWS, buat pengguna IAM khusus:
 
@@ -58,7 +58,7 @@ Untuk memungkinkan GitHub Actions berinteraksi dengan AWS, buat pengguna IAM khu
 
 ---
 
-### 2. 🛡️ Membuat Peran untuk ECS
+### 2. Membuat Peran untuk ECS
 
 Agar ECS dapat menjalankan task, buat IAM Role:
 
@@ -70,7 +70,7 @@ Agar ECS dapat menjalankan task, buat IAM Role:
 
 ---
 
-### 3. 🧱 Membuat Klaster ECS
+### 3. Membuat Klaster ECS
 
 Klaster adalah tempat ECS service dijalankan:
 
@@ -83,7 +83,7 @@ Klaster adalah tempat ECS service dijalankan:
 
 ---
 
-### 4. 📦 Membuat Definisi Tugas (Task Definition)
+### 4. Membuat Definisi Tugas (Task Definition)
 
 Mendefinisikan cara menjalankan container:
 
@@ -103,7 +103,7 @@ Mendefinisikan cara menjalankan container:
 
 ---
 
-### 5. 🌐 Membuat ECS Service & Application Load Balancer (ALB)
+### 5. Membuat ECS Service & Application Load Balancer (ALB)
 
 Service menjaga task tetap berjalan, dan ALB mendistribusikan trafik:
 
