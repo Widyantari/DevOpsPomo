@@ -6,107 +6,127 @@
 - Widyantari Nuriyanti (5026221137)
 - Sheva Aulia (5026221145)
 
+Dokumentasi pembuatan aplikasi: [Dokumentasi Pembuatan](https://intip.in/DokumentasiKonfigurasi/)
+
 ![Screenshot](screenshot.png)
 
-## Deskripsi Aplikasi
+## 🍋 Deskripsi Aplikasi
 
-Aplikasi timer dengan menerapkan metode pomodoro yaitu 25 menit bekerja secara aktif serta istirahat antar sesi. Waktu istirahat dapat dipilih sesuai dengan kebutuhan pengguna, terdapat pilihan Istirahat Sebentar dan Istirahat Lama.
+Aplikasi timer dengan menerapkan metode pomodoro yaitu 25 menit bekerja secara aktif serta istirahat antar sesi. Waktu istirahat dapat dipilih sesuai dengan kebutuhan pengguna, terdapat pilihan Short Break (istirahat sebentar) dan Long Break (istirahat lama).
 
 Aplikasi ini diambil melalui forking source pada github https://github.com/luizbatanero/pomodoro-react. Perubahan fitur yang dilakukan adalah menambahkan custom lama waktu untuk bekerja secara aktif sehingga bisa disesuaikan dengan keinginan pengguna.
 
-## Tools yang Digunakan
+## 🧰 Tools yang Digunakan
 
-Kami memanfaatkan alat-alat berikut untuk membuat Pipeline CI/CD yang baik untuk Pomonode:
+Kami memanfaatkan tools berikut dalam membuat Pipeline CI/CD untuk aplikasi Pomonode:
+- AWS (Amazon Web Services): Menjalankan aplikasi container dari Docker Hub via ECS tanpa perlu mengatur server manual. Mendukung deployment yang scalable dan terkelola.
+- GitHub Actions: Otomatisasi CI/CD langsung dari GitHub. Memicu build, test, dan deployment setiap ada commit atau pull request.
+- ESLint: Linter untuk kode JavaScript. Menjaga kualitas dan konsistensi kode dengan deteksi error otomatis di pipeline CI/CD.
+- Vitest: Framework testing modern untuk proyek berbasis Vite. Memastikan kestabilan dan kebenaran fungsi aplikasi.
+- Docker: Platform untuk membungkus aplikasi dan dependensinya dalam container yang portabel dan konsisten. Menghindari masalah perbedaan environment.
+- AWS CloudWatch: Layanan monitoring dari AWS untuk mengawasi metrik, log, dan performa aplikasi serta infrastruktur. Membantu mendeteksi error, memantau resource, dan mengatur notifikasi otomatis bila terjadi gangguan.
 
-### AWS (Amazon Web Services)
+## 🛠️ Instalasi Aplikasi
 
-AWS (Amazon Web Services) bisa digunakan untuk menjalankan aplikasi yang sudah dibuat dalam bentuk container, seperti yang ada di Docker Hub. Setelah aplikasi dikirim ke Docker Hub, AWS lewat layanan bernama ECS (Elastic Container Service) bisa mengambil aplikasi itu dan menjalankannya di server milik AWS. Dengan cara ini, kita bisa menjalankan aplikasi tanpa perlu mengatur server secara manual, dan AWS bisa membantu mengatur jalannya aplikasi supaya tetap lancar.
+- Clone repository:
+```bash
+git clone https://github.com/widyantari/DevOpsPomo.git
+```
 
-### GitHub Actions
+- Masuk ke directory dan install dependencies :
+```bash
+cd DevOpsPomo && npm install
+```
 
-GitHub Actions adalah fitur otomatisasi terintegrasi dalam platform GitHub yang dirancang untuk mengotomatisasi alur kerja pengembangan perangkat lunak secara langsung dari repositori. Fungsinya mencakup dukungan untuk Continuous Integration (CI), seperti eksekusi pengujian otomatis dan pemeriksaan kualitas kode, serta Continuous Deployment (CD) guna mengotomatiskan proses pengiriman aplikasi. Lebih lanjut, GitHub Actions juga sangat efektif untuk manajemen rilis, pembaruan dokumentasi, dan berbagai tugas repetitif lainnya. Setiap kali terjadi perubahan pada kode, misalnya melalui commit atau pull request, sebuah proses otomatis akan terpicu untuk melakukan build, pengujian, dan distribusi aplikasi.
+- Jalankan aplikasi:
+```bash
+npm run start
+```
 
-### ESLint
+## 🌩️ Tahap Pengaturan Cloud
 
-ESLint adalah alat penting yang berfungsi untuk memeriksa dan memperbaiki kode JavaScript secara statis, memastikan kode tetap rapi dan bebas dari kesalahan. Dengan ESLint, pengembang dapat memastikan kode mengikuti standar dan aturan tertentu, serta mencegah potensi bug sejak tahap awal pengembangan. Di proyek pomonade, pemanfaatan ESLint diintegrasikan langsung pada pipeline CI/CD. Hal ini sangat krusial karena setiap perubahan kode akan secara otomatis melalui pemeriksaan kualitas oleh ESLint, sehingga kami dapat menjaga konsistensi dan kualitas kode secara berkelanjutan di seluruh proyek.
+### 1. Buat Akun Pengguna IAM untuk GitHub Actions
 
-### Vitest
+Untuk memungkinkan GitHub Actions berinteraksi dengan AWS, buat pengguna IAM khusus:
 
-Vitest adalah sebuah framework pengujian (testing) modern berbasis JavaScript yang dirancang untuk performa tinggi dan kompatibilitas yang luas, terutama dalam ekosistem Vite. Dengan integrasi yang mulus terhadap proyek Vite, Vitest membantu memastikan bahwa kode aplikasi berjalan sesuai harapan dan tetap stabil dalam setiap iterasi pengembangan.
+- Buka **AWS Console > IAM > Users > Add users**
+- Isi nama pengguna, contoh: `DevOpsPomo`
+- Pilih tipe akses: **Programmatic access**
+- Lampirkan policy berikut:
+  - `AmazonEC2ContainerRegistryPowerUser`
+  - `AmazonECS_FullAccess`
+  - `IAMReadOnlyAccess`
+- Selesaikan pembuatan, lalu **catat Access Key ID dan Secret Access Key**
 
-### Docker
+---
 
-Docker merupakan sebuah platform containerization untuk membuat, mendistribusikan, dan menjalankan aplikasi dalam wadah (container) yang portabel, konsisten, dan terisolasi. Dengan menggunakan Docker, aplikasi beserta dependensinya dapat dikemas menjadi satu kesatuan yang dapat dijalankan di berbagai lingkungan, baik pada perangkat lokal, server cloud, maupun infrastruktur lainnya, tanpa perlu melakukan pengaturan ulang yang kompleks. Hal ini juga mengurangi risiko terjadinya ketidakcocokan environtment, antar device karena seluruh eksekusi aplikasi dilakukan pada lingkungan yang sama secara konsisten. Berikut ini adalah kode dari dockerfile dan hasilnya yaitu docker image
+### 2. Membuat Peran untuk ECS
 
-## Tahap Pengembangan (CI/CD Pipeline)
+Agar ECS dapat menjalankan task, buat IAM Role:
 
-Alur kerja CI/CD kami mengotomatiskan proses pembuatan, pengujian, dan penerapan Pomonode. Berikut ini adalah uraian langkah-langkah utama:
+- Buka **IAM > Roles > Create role**
+- Pilih trusted entity: **AWS Service**
+- Cari dan pilih: **Elastic Container Service**
+- Lanjutkan dan selesaikan pembuatan role
+- Nama role akan menjadi: `AWSServiceRoleForECS` (default)
 
-### AWS Setup
+---
 
-1. Buat Pengguna IAM untuk GitHub Actions
-   Untuk memungkinkan GitHub Actions berinteraksi dengan AWS, kami membuat pengguna IAM khusus:
+### 3. Membuat Klaster ECS
 
-- Masuk ke Konsol AWS > IAM > Pengguna (Users) > Tambahkan pengguna (Add users).
-- Beri nama (e.g., DevOpsPomo).
-- Pilih Akses terprogram (Programmatic access).
-- Lampirkan kebijakan:
-  - AmazonEC2ContainerRegistryPowerUser
-  - AmazonECS_FullAccess
-  - IAMReadOnlyAccess
-- Selesaikan pembuatan pengguna, lalu catat Access Key ID dan Secret Access Key.
+Klaster adalah tempat ECS service dijalankan:
 
-2. Membuat Peran pada Layanan ECS
-   Peran IAM dibuat agar ECS dapat menjalankan tugas:
+- Buka **ECS > Clusters > Create Cluster**
+- Pilih template: **AWS Fargate**
+- Isi nama klaster, misalnya: `devopspomo-cluster`  
+  (harus sama dengan `ECS_CLUSTER_NAME` di `cicd.yml`)
+- Gunakan pengaturan VPC default
+- Klik **Create**
 
-- Masuk ke Konsol AWS > IAM > Peran (Roles) > Buat peran (Create role).
-- Pilih Layanan AWS (AWS Service) as the trusted entity.
-- Cari dan pilih "Elastic Container Service".
-- Lanjutkan dan buat peran. Pastikan namanya otomatis menjadi AWSServiceRoleForECS.
+---
 
-3. Membuat Klaster ECS
-   Klaster ECS berfungsi sebagai pengelompokan logis untuk layanan kami:
+### 4. Membuat Definisi Tugas (Task Definition)
 
-- Masuk ke Konsol AWS > ECS > Kluster (Clusters) > Buat Kluster (Create Cluster).
-  Pilih template "AWS Fargate".
-- Beri Nama kluster yang persis sama dengan ECS_CLUSTER_NAME di cicd.yml (misal devopspomo-cluster).
-- Biarkan pengaturan VPC default.
-- Selesaikan pembuatan kluster.
+Mendefinisikan cara menjalankan container:
 
-4. Membuat Definisi Tugas (Task Definition) ECS
-   Definisi tugas menjelaskan bagaimana aplikasi kita berjalan di ECS:
+- Buka **ECS > Task Definitions > Create new Task Definition**
+- Pilih launch type: **Fargate**
+- Nama definisi tugas: `devopspomo-service`  
+  (harus sama dengan `ECS_SERVICE_NAME`)
+- Execution role: **Buat peran baru** → otomatis jadi `ecsTaskExecutionRole`
+- Task size:
+  - Memory: `0.5 GB`
+  - vCPU: `0.25 vCPU`
+- Tambahkan kontainer:
+  - **Name**: `devopspomo-container` (sesuai `CONTAINER_NAME`)
+  - **Image**: `widyantari/pomonade:latest`
+  - **Port mapping**: `80`
+- Klik **Create**
 
-- Masuk ke Konsol AWS > ECS > Definisi Tugas (Task Definitions) > Buat definisi tugas baru (Create new Task Definition).
-- Pilih "Fargate".
-- Beri Nama definisi tugas yang persis sama dengan ECS_SERVICE_NAME di cicd.yml (misal devopspomo-service).
-- Peran Eksekusi Tugas: Pilih "Buat peran baru" (akan membuat ecsTaskExecutionRole).
-- Ukuran Tugas: Pilih 0.5GB memori dan 0.25 vCPU.
-- Tambahkan Kontainer:
-  - Nama kontainer: Persis sama dengan CONTAINER_NAME di main-pipeline.yml (misal devopspomo-container).
-  - Image: Masukkan URI image Docker Hub publik ( widyantari/pomonade:latest).
-  - Port mappings: 80 (untuk Nginx).
-  - Selesaikan pembuatan definisi tugas.
+---
 
-5. Membuat Layanan ECS (Service) dan Application Load Balancer (ALB)
-   Layanan ECS mempertahankan jumlah tugas yang diinginkan, dan ALB mendistribusikan lalu lintas masuk:
+### 5. Membuat ECS Service & Application Load Balancer (ALB)
 
-- Dari halaman ringkasan Definisi Tugas yang baru dibuat, klik "Buat Layanan" (Create Service).
-- Langkah 1: Konfigurasi Layanan:
-  - Kluster: Pilih kluster (devopspomo-cluster).
-  - Jenis Peluncuran: "Fargate".
-  - Definisi Tugas: Pilih definisi tugas yang baru dibuat (devopspomo-service:revisi_terbaru).
-  - Nama Layanan: Persis sama dengan ECS_SERVICE_NAME di main-pipeline.yml (misal devopspomo-service).
-  - Jumlah Tugas yang diinginkan: 1.
-- Langkah 2: Konfigurasi Jaringan:
-  - VPC: VPC default.
-  - Subnet: Pilih setidaknya dua subnet publik.
-  - Grup keamanan (Security Group): Buat grup keamanan baru (misal devopspomo-sg), atur aturan \* masuk HTTP port 80 dari 0.0.0.0/0.
-  - Penyeimbang Beban (Load Balancing): Pilih "Application Load Balancer".
-  - Nama penyeimbang beban: Buat baru (devopspomo-alb).
-  - Grup target untuk penyeimbang beban: Buat grup target baru (misal devopspomo-tg), atur protokol HTTP port 80.
-- Langkah 3: Atur Autoscaling: Pilih "Jangan konfigurasikan penskalaan otomatis".
+Service menjaga task tetap berjalan, dan ALB mendistribusikan trafik:
 
-Runs the app in development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- Dari Task Definition, klik **Create Service**
+- **Konfigurasi Service**:
+  - Cluster: `devopspomo-cluster`
+  - Launch type: `Fargate`
+  - Task Definition: `devopspomo-service`
+  - Service name: `devopspomo-service`
+  - Desired tasks: `1`
+
+- **Konfigurasi Jaringan**:
+  - VPC: default
+  - Subnet: pilih minimal 2 **public subnet**
+  - Security Group: buat baru `devopspomo-sg`
+    - Tambahkan rule: HTTP (port 80) dari `0.0.0.0/0`
+  - Load Balancer: pilih **Application Load Balancer**
+  - Buat ALB: `devopspomo-alb`
+  - Buat Target Group: `devopspomo-tg` (protocol HTTP, port 80)
+
+- **Autoscaling**: pilih **Do not configure autoscaling**
+
 
 ## PSO A
