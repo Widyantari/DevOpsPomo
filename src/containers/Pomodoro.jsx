@@ -232,7 +232,7 @@ class Pomodoro extends Component {
       <div className="Content">
         <div className="Pomodoro">
           <div className="Header">
-            <h1>🍋Pomonade🍋</h1>
+            <h1>🍋Pomonade Timer🍋</h1>
             <p>Pomodoro Timer App</p>
           </div>
 
