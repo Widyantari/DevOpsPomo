@@ -71,8 +71,20 @@ class Pomodoro extends Component {
     }
   };
 
-  // --- 👇 FUNGSI INI SUDAH DIKEMBALIKAN KE VERSI ASLI ---
+  // --- 👇 Tambah Warning Di sini ---
   changeType = (type) => {
+    const { running, selectedType } = this.state;
+
+    if (running && type.name !== selectedType.name) {
+      const userConfirmed = window.confirm(
+        'Timer sedang berjalan. Apakah Anda yakin ingin pindah dan menghentikan sesi ini?'
+      );
+
+      if (!userConfirmed) {
+        return;
+      }
+    }
+
     this.stopInterval();
     this.setState({
       selectedType: type,
