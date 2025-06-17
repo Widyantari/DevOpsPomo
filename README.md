@@ -1,6 +1,6 @@
 # POMONADE: A POMONADE TIMER🍋
 
-## Kelompok 12:
+## Kelompok 3:
 
 - Silfia Mei Wulandari (5026221073)
 - Widyantari Nuriyanti (5026221137)
@@ -14,7 +14,7 @@ Dokumentasi pembuatan aplikasi: [Dokumentasi Pembuatan](https://intip.in/Dokumen
 
 Aplikasi timer dengan menerapkan metode pomodoro yaitu 25 menit bekerja secara aktif serta istirahat antar sesi. Waktu istirahat dapat dipilih sesuai dengan kebutuhan pengguna, terdapat pilihan Short Break (istirahat sebentar) dan Long Break (istirahat lama).
 
-Aplikasi ini diambil melalui forking source pada github https://github.com/luizbatanero/pomodoro-react. Perubahan fitur yang dilakukan adalah menambahkan custom lama waktu untuk bekerja secara aktif sehingga bisa disesuaikan dengan keinginan pengguna.
+Aplikasi ini diambil melalui forking source pada github https://github.com/luizbatanero/pomodoro-react. Perubahan fitur yang dilakukan adalah menambahkan custom lama waktu untuk bekerja secara aktif sehingga bisa disesuaikan dengan keinginan pengguna serta fitur notes yang interaktif untuk dihapus dan ditambahkan.
 
 ## 🧰 Tools yang Digunakan
 
