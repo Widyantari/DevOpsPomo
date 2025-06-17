@@ -22,11 +22,11 @@ Link Cloud AWS: [DevOpsPomo](http://devopspomo-alb-165380948.ap-southeast-2.elb.
 ## 🧰 Tools yang Digunakan
 
 Kami memanfaatkan tools berikut dalam membuat Pipeline CI/CD untuk aplikasi Pomonode:
-- AWS (Amazon Web Services): Menjalankan aplikasi container dari Docker Hub via ECS tanpa perlu mengatur server manual. Mendukung deployment yang scalable dan terkelola.
 - GitHub Actions: Otomatisasi CI/CD langsung dari GitHub. Memicu build, test, dan deployment setiap ada commit atau pull request.
 - ESLint: Linter untuk kode JavaScript. Menjaga kualitas dan konsistensi kode dengan deteksi error otomatis di pipeline CI/CD.
 - Vitest: Framework testing modern untuk proyek berbasis Vite. Memastikan kestabilan dan kebenaran fungsi aplikasi.
 - Docker: Platform untuk membungkus aplikasi dan dependensinya dalam container yang portabel dan konsisten. Menghindari masalah perbedaan environment.
+- AWS (Amazon Web Services): Menjalankan aplikasi container dari Docker Hub via ECS tanpa perlu mengatur server manual. Mendukung deployment yang scalable dan terkelola.
 - AWS CloudWatch: Layanan monitoring dari AWS untuk mengawasi metrik, log, dan performa aplikasi serta infrastruktur. Membantu mendeteksi error, memantau resource, dan mengatur notifikasi otomatis bila terjadi gangguan.
 
 ## 🛠️ Instalasi Aplikasi
