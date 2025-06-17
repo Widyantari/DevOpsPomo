@@ -16,6 +16,9 @@ Aplikasi timer dengan menerapkan metode pomodoro yaitu 25 menit bekerja secara a
 
 Aplikasi ini diambil melalui forking source pada github https://github.com/luizbatanero/pomodoro-react. Perubahan fitur yang dilakukan adalah menambahkan custom lama waktu untuk bekerja secara aktif sehingga bisa disesuaikan dengan keinginan pengguna serta fitur notes yang interaktif untuk dihapus dan ditambahkan.
 
+## 💻 Live Link AWS
+Link Cloud AWS: [DevOpsPomo](http://devopspomo-alb-165380948.ap-southeast-2.elb.amazonaws.com/)
+
 ## 🧰 Tools yang Digunakan
 
 Kami memanfaatkan tools berikut dalam membuat Pipeline CI/CD untuk aplikasi Pomonode:
